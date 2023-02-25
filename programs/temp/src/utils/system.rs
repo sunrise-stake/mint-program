@@ -1,0 +1,34 @@
+use crate::seeds::OFFSET_METADATA_SEED;
+use crate::state::OffsetMetadata;
+use anchor_lang::prelude::*;
+use anchor_lang::solana_program;
+
+pub fn create_offset_metadata_account<'a>(
+    program_id: &Pubkey,
+    payer: AccountInfo<'a>,
+    mint: Pubkey,
+    pda: AccountInfo<'a>,
+    system: &Program<'a, System>,
+) -> Result<()> {
+    let rent = Rent::get()?;
+    let offset_metadata_lamports = rent.minimum_balance(OffsetMetadata::SPACE);
+
+    let account = solana_program::system_instruction::create_account(
+        &payer.key(),
+        &pda.key(),
+        offset_metadata_lamports,
+        OffsetMetadata::SPACE as u64,
+        program_id,
+    );
+
+    let seed = &[OFFSET_METADATA_SEED, mint.as_ref()][..];
+
+    // Send the system instruction to the runtime for processing
+    solana_program::program::invoke_signed(
+        &account,
+        &[payer, pda, system.to_account_info()],
+        &[seed],
+    )?;
+
+    Ok(())
+}
