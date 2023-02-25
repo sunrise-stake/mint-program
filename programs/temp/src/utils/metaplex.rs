@@ -1,6 +1,10 @@
+use crate::state::OffsetTiers;
 use anchor_lang::prelude::*;
 use anchor_lang::solana_program::program::invoke;
 use mpl_token_metadata::instruction::{create_master_edition_v3, create_metadata_accounts_v3};
+use mpl_token_metadata::state::{Metadata, TokenMetadataAccount};
+
+use crate::Level;
 
 pub fn create_metadata_account<'a>(
     name: String,
@@ -97,6 +101,27 @@ pub fn create_master_edition_account<'a>(
         ),
         accounts.as_slice(),
     )?;
+
+    Ok(())
+}
+
+pub fn set_metadata_uri<'a>(
+    offset_tiers: &Account<'a, OffsetTiers>,
+    metadata: &AccountInfo<'a>,
+    offset_amount: u64,
+) -> Result<()> {
+    let default_level = Level {
+        offset: offset_tiers.levels[0].offset,
+        uri: offset_tiers.levels[0].uri.clone(),
+    };
+
+    let level = offset_tiers
+        .get_level(offset_amount)
+        .unwrap_or(&default_level);
+
+    let mut metadata: Metadata =
+        TokenMetadataAccount::from_account_info(&metadata.to_account_info())?;
+    metadata.data.uri = level.uri.to_string();
 
     Ok(())
 }

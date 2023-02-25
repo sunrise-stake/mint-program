@@ -60,6 +60,19 @@ impl OffsetTiers {
         self.authority = input.authority;
         self.levels = input.levels;
     }
+
+    pub fn get_level(&self, offset: u64) -> Option<&Level> {
+        let level_index = match self
+            .levels
+            .iter()
+            .rev()
+            .position(|level| level.offset <= offset)
+        {
+            Some(i) => self.levels.len() - 1 - i,
+            None => 0,
+        };
+        Some(&self.levels[level_index])
+    }
 }
 
 #[account]
