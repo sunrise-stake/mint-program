@@ -8,4 +8,6 @@ pub enum ErrorCode {
     InvalidOffsetMetadata,
     #[msg("Invalid offset tiers pda")]
     NoOffsetTiers,
+    #[msg("Invalid update for mint")]
+    InvalidUpdateForMint
 }
