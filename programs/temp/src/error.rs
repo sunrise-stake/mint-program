@@ -6,4 +6,6 @@ pub enum ErrorCode {
     InvalidUpdateAuthority,
     #[msg("Invalid offset metadata pda")]
     InvalidOffsetMetadata,
+    #[msg("Invalid offset tiers pda")]
+    NoOffsetTiers,
 }

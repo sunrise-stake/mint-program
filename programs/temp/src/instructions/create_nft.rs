@@ -66,7 +66,6 @@ pub fn mint_nft(
     name: String,
     symbol: String,
 ) -> Result<()> {
-    let uri = "hello world";
     let mint = &ctx.accounts.mint;
     let mint_authority = &ctx.accounts.mint_authority;
     let payer = &ctx.accounts.payer;
@@ -78,6 +77,11 @@ pub fn mint_nft(
     let offset_tiers = &mut ctx.accounts.offset_tiers;
     let metadata = &mut ctx.accounts.metadata;
     let master_edition = &mut ctx.accounts.master_edition;
+
+    // TODO: check that offset_tiers.levels.len() > 0
+    if offset_tiers.levels.is_empty() {
+        return Err(ErrorCode::NoOffsetTiers.into());
+    }
 
     if **ctx.accounts.mint.to_account_info().try_borrow_lamports()? > 0 {
         set_offset_metadata(
@@ -97,10 +101,11 @@ pub fn mint_nft(
             &rent.to_account_info(),
         )?;
 
+
         create_metadata_account(
             name,
             symbol,
-            uri.to_string(),
+            offset_tiers.levels[0].uri.to_string(),
             &metadata.to_account_info(),
             &mint.to_account_info(),
             &mint_authority.to_account_info(),
@@ -138,8 +143,6 @@ pub fn mint_nft(
             offset_metadata,
             offset_amount,
         )?;
-
-        set_metadata_uri(offset_tiers, &metadata.to_account_info(), offset_amount)?
     }
 
     Ok(())
