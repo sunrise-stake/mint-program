@@ -1,6 +1,5 @@
-
 use crate::error::ErrorCode;
-use crate::seeds::{GLOBAL_STATE_SEED, OFFSET_TIERS_SEED, OFFSET_METADATA_SEED};
+use crate::seeds::{GLOBAL_STATE_SEED, OFFSET_METADATA_SEED, OFFSET_TIERS_SEED};
 use crate::state::{GlobalState, OffsetMetadata, OffsetTiers};
 use crate::utils::metaplex::set_metadata_uri;
 use crate::utils::offset::set_offset_metadata;
@@ -44,10 +43,7 @@ pub struct MintNFT<'info> {
 }
 
 /** TODO: review edge cases */
-pub fn update_nft(
-    ctx: Context<MintNFT>,
-    offset_amount: u64,
-) -> Result<()> {
+pub fn update_nft(ctx: Context<MintNFT>, offset_amount: u64) -> Result<()> {
     let mint = &ctx.accounts.mint;
     let mint_authority = &ctx.accounts.mint_authority;
     let offset_metadata = &ctx.accounts.offset_metadata;
@@ -58,8 +54,6 @@ pub fn update_nft(
     if offset_tiers.levels.is_empty() {
         return Err(ErrorCode::NoOffsetTiers.into());
     }
-
-
 
     if **ctx.accounts.mint.to_account_info().try_borrow_lamports()? > 0 {
         set_offset_metadata(

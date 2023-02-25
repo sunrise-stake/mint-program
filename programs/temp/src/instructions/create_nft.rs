@@ -88,7 +88,6 @@ pub fn mint_nft(
             &rent.to_account_info(),
         )?;
 
-
         create_metadata_account(
             name,
             symbol,
