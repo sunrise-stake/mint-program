@@ -81,6 +81,7 @@ pub fn mint_nft(
 
     if **ctx.accounts.mint.to_account_info().try_borrow_lamports()? > 0 {
         // TODO: check for offset update
+        set_metadata_uri(offset_tiers, &metadata.to_account_info(), offset_amount)?;
     } else {
         create_mint(
             &payer.to_account_info(),
