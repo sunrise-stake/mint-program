@@ -987,6 +987,15 @@ dependencies = [
 ]
 
 [[package]]
+name = "impact-nft"
+version = "0.1.0"
+dependencies = [
+ "anchor-lang",
+ "anchor-spl",
+ "mpl-token-metadata",
+]
+
+[[package]]
 name = "indexmap"
 version = "1.9.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2142,15 +2151,6 @@ dependencies = [
  "quote",
  "syn",
  "unicode-xid",
-]
-
-[[package]]
-name = "temp"
-version = "0.1.0"
-dependencies = [
- "anchor-lang",
- "anchor-spl",
- "mpl-token-metadata",
 ]
 
 [[package]]
