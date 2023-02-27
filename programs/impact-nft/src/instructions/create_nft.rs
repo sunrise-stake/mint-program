@@ -18,15 +18,20 @@ pub struct MintNFT<'info> {
     pub mint: Account<'info, Mint>,
     pub token_program: Program<'info, Token>,
     #[account(mut)]
+    /// CHECK: Checked by metaplex (TODO ?)
     pub metadata: AccountInfo<'info>,
     #[account(mut)]
+    /// CHECK: Created by metaplex (TODO ?)
     pub token_account: UncheckedAccount<'info>,
+    /// CHECK: Checked by metaplex (TODO ?)
     pub token_metadata_program: UncheckedAccount<'info>,
     #[account(mut)]
-    pub payer: AccountInfo<'info>,
+    pub payer: Signer<'info>,
     pub system_program: Program<'info, System>,
+    /// CHECK: TODO fix
     pub rent: AccountInfo<'info>,
     #[account(mut)]
+    /// CHECK: Checked by metaplex (TODO ?)
     pub master_edition: UncheckedAccount<'info>,
     #[account(
         mut,
@@ -47,7 +52,7 @@ pub struct MintNFT<'info> {
 }
 
 /** TODO: add offset update logic */
-pub fn mint_nft(
+pub fn mint_nft_handler(
     ctx: Context<MintNFT>,
     offset_amount: u64,
     name: String,

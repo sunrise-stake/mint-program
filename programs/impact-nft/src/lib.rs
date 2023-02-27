@@ -12,7 +12,7 @@ pub mod utils;
 pub mod instructions;
 use instructions::*;
 
-declare_id!("Fg6PaFpoGXkYsidMpWTK6W2BeZ7FEfcYkg476zPFsLnS");
+declare_id!("SUNFT6ErsQvMcDzMcGyndq2P31wYCFs6G6WEcoyGkGc");
 
 #[program]
 pub mod impact_nft {
@@ -23,6 +23,15 @@ pub mod impact_nft {
         input: GlobalStateInput,
     ) -> Result<()> {
         create_global_state_handler(ctx, input)
+    }
+
+    pub fn mint_nft(
+        ctx: Context<MintNFT>,
+        offset_amount: u64,
+        name: String,
+        symbol: String,
+    ) -> Result<()> {
+        mint_nft_handler(ctx, offset_amount, name, symbol)
     }
 }
 

@@ -7,18 +7,20 @@ use anchor_lang::prelude::*;
 use anchor_spl::token::{Mint, Token};
 
 #[derive(Accounts)]
-pub struct MintNFT<'info> {
+pub struct UpdateNFT<'info> {
     #[account(mut)]
     pub mint_authority: Signer<'info>,
     #[account(mut)]
     pub mint: Account<'info, Mint>,
     pub token_program: Program<'info, Token>,
     #[account(mut)]
+    /// CHECK: Checked by metaplex (TODO ?)
     pub metadata: AccountInfo<'info>,
     #[account(mut)]
+    /// CHECK: Checked by metaplex (TODO ?)
     pub token_account: UncheckedAccount<'info>,
     #[account(mut)]
-    pub payer: AccountInfo<'info>,
+    pub payer: Signer<'info>,
     #[account(
         mut,
         seeds = [GLOBAL_STATE_SEED, mint_authority.key().as_ref()],
@@ -43,7 +45,7 @@ pub struct MintNFT<'info> {
 }
 
 /** TODO: review edge cases */
-pub fn update_nft(ctx: Context<MintNFT>, offset_amount: u64) -> Result<()> {
+pub fn update_nft_handler(ctx: Context<UpdateNFT>, offset_amount: u64) -> Result<()> {
     let mint = &ctx.accounts.mint;
     let mint_authority = &ctx.accounts.mint_authority;
     let offset_metadata = &ctx.accounts.offset_metadata;
