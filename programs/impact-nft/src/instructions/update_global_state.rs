@@ -7,11 +7,11 @@ use anchor_lang::prelude::*;
 pub struct UpdateGlobalState<'info> {
     #[account(
         mut
-        constraint = authority.key() == state.authority @ ErrorCode::InvalidUpdateAuthority,
+        constraint = authority.key() == global_state.authority @ ErrorCode::InvalidUpdateAuthority,
     )]
     pub authority: Signer<'info>,
     #[account(
-        seeds = [GLOBAL_STATE_SEED, state.authority.as_ref()],
+        seeds = [GLOBAL_STATE_SEED, global_state.authority.as_ref()],
         bump,
         payer = authority,
         space = GlobalState::SPACE,
