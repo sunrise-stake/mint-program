@@ -4,7 +4,7 @@ use anchor_lang::prelude::*;
 
 #[derive(Accounts, Clone)]
 #[instruction(state: GlobalStateInput)]
-pub struct CreateGlobalState<'info> {
+pub struct UpdateGlobalState<'info> {
     #[account(
         mut
         constraint = authority.key() == state.authority @ ErrorCode::InvalidUpdateAuthority,
@@ -20,7 +20,7 @@ pub struct CreateGlobalState<'info> {
     pub system_program: Program<'info, System>,
 }
 
-pub fn create_global_state_handler(
+pub fn update_global_state_handler(
     ctx: Context<CreateGlobalState>,
     state: GlobalStateInput,
 ) -> Result<()> {
