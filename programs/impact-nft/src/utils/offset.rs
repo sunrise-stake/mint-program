@@ -12,8 +12,8 @@ pub fn set_offset_metadata<'a>(
     // Checked in validator
 
     /* set offset metadata */
-    let mut offset_metadata_owned = Account::<'a, OffsetMetadata>::try_from(offset_metadata)?;
-    offset_metadata_owned.set(
+    let mut owned_offset_metadata = Account::<'a, OffsetMetadata>::try_from(offset_metadata)?;
+    owned_offset_metadata.set(
         mint_authority.key(),
         mint.key(),
         offset_amount,
@@ -21,6 +21,6 @@ pub fn set_offset_metadata<'a>(
     );
 
     // Serialize changes back into account, skipping the space allocated to discriminator
-    offset_metadata_owned.serialize(&mut &mut offset_metadata.data.borrow_mut()[8..])?;
+    owned_offset_metadata.serialize(&mut &mut offset_metadata.data.borrow_mut()[8..])?;
     Ok(())
 }

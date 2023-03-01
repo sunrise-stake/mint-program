@@ -52,8 +52,8 @@ describe("impact-nft", () => {
   let offsetMetadataAddress: PublicKey;
   let userAssociatedTokenAccount: PublicKey;
 
-  const initialOffset = new BN(120); // should still default to a level 0 nft
-  const updatedOffset = new BN(150); // should upgrade to a level1 nft
+  const initialOffset = new BN(140); // should still default to a level0 nft
+  const updatedOffset = new BN(180); // should upgrade to a level1 nft
 
   it("Can register a new global state", async () => {
     const levels = 10;
@@ -174,16 +174,14 @@ describe("impact-nft", () => {
 
     const value = await program.provider.connection.getTokenAccountBalance(
       userAssociatedTokenAccount).then((res) => res.value);
-    console.log("value: ", value);
     assert(Number(value.amount) == 1);
+
+    let offsetMetadata = await program.account.offsetMetadata.fetch(offsetMetadataAddress);
+    assert(offsetMetadata.offset.eq(initialOffset));
   });
 
 
   it("can update an nft", async() => {
-    let offsetInfo = await program.account.offsetMetadata.fetch(offsetMetadataAddress);
-    console.log("on-chain authority: ", offsetInfo.authority.toBase58());
-    console.log("off-chain authority: ", authority.publicKey.toBase58());
-    try {
     await program.methods
       .updateNft(updatedOffset)
       .accounts({
@@ -198,10 +196,10 @@ describe("impact-nft", () => {
       })
       .signers([authority])
       .rpc();
-    } catch(err) {
-      console.log("caught an error. where are the logs?");
-      console.log(err);
-    }
 
+    let offsetMetadata = await program.account.offsetMetadata.fetch(offsetMetadataAddress);
+    assert(offsetMetadata.offset.eq(updatedOffset));
+
+    // TODO: Find a way to validate that the mpl metadata is indeed updated
   });
 });

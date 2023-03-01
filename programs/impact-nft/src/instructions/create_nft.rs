@@ -75,7 +75,7 @@ pub fn mint_nft_handler(
     let token_program = &ctx.accounts.token_program;
     let token_metadata_program = &ctx.accounts.token_metadata_program;
     let rent = &ctx.accounts.rent;
-    let offset_metadata = &mut ctx.accounts.offset_metadata;
+    let offset_metadata = &ctx.accounts.offset_metadata;
     let offset_tiers = &mut ctx.accounts.offset_tiers;
     let metadata = &mut ctx.accounts.metadata;
     let master_edition = &mut ctx.accounts.master_edition;

@@ -2,7 +2,6 @@ use crate::error::ErrorCode;
 use crate::seeds::{GLOBAL_STATE_SEED, OFFSET_METADATA_SEED, OFFSET_TIERS_SEED};
 use crate::state::{GlobalState, OffsetMetadata, OffsetTiers};
 use crate::utils::metaplex::set_metadata_uri;
-use crate::utils::offset::set_offset_metadata;
 use anchor_lang::prelude::*;
 use anchor_spl::token::{Mint, Token, TokenAccount};
 
@@ -45,7 +44,7 @@ pub struct UpdateNft<'info> {
 pub fn update_nft_handler(ctx: Context<UpdateNft>, offset_amount: u64) -> Result<()> {
     let mint = &ctx.accounts.mint;
     let mint_authority = &ctx.accounts.mint_authority;
-    let offset_metadata = &ctx.accounts.offset_metadata;
+    let offset_metadata = &mut ctx.accounts.offset_metadata;
     let offset_tiers = &mut ctx.accounts.offset_tiers;
     let metadata = &mut ctx.accounts.metadata;
 
@@ -55,13 +54,12 @@ pub fn update_nft_handler(ctx: Context<UpdateNft>, offset_amount: u64) -> Result
     }
 
     if **ctx.accounts.mint.to_account_info().try_borrow_lamports()? > 0 {
-        set_offset_metadata(
-            &mint.to_account_info(),
-            &mint_authority.to_account_info(),
-            &offset_metadata.to_account_info(),
+        offset_metadata.set(
+            mint_authority.key(),
+            mint.key(),
             offset_amount,
             *ctx.bumps.get("offset_metadata").unwrap(),
-        )?;
+        );
         set_metadata_uri(offset_tiers, &metadata.to_account_info(), offset_amount)?;
     } else {
         return Err(ErrorCode::InvalidUpdateForMint.into());
