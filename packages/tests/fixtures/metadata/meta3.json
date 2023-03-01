@@ -1,0 +1,10 @@
+{
+    "name": "sunrise3",
+    "symbol": "lvl3",
+    "description": "description3",
+    "seller_fee_basis_points": 1,
+    "external_url": "",
+    "edition": "",
+    "background_color": "000000",
+    "image": "https://raw.githubusercontent.com/sunrise-stake/mint-program/ademola/packages/tests/fixtures/content/level3.jpeg"
+}
