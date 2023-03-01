@@ -11,9 +11,11 @@ pub struct CreateGlobalState<'info> {
         init,
         seeds = [GLOBAL_STATE_SEED, state.authority.as_ref()],
         bump,
-        payer = authority,
+        payer = payer,
         space = GlobalState::SPACE,
     )]
+    #[account(mut)]
+    pub payer: Signer<'info>,
     pub global_state: Account<'info, GlobalState>,
     pub system_program: Program<'info, System>,
 }
