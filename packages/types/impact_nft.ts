@@ -11,6 +11,11 @@ export type ImpactNft = {
           "isSigner": true
         },
         {
+          "name": "payer",
+          "isMut": true,
+          "isSigner": true
+        },
+        {
           "name": "globalState",
           "isMut": true,
           "isSigner": false
@@ -174,6 +179,11 @@ export const IDL: ImpactNft = {
       "accounts": [
         {
           "name": "authority",
+          "isMut": true,
+          "isSigner": true
+        },
+        {
+          "name": "payer",
           "isMut": true,
           "isSigner": true
         },
