@@ -17,7 +17,7 @@ pub struct UpdateOffsetTiers<'info> {
     #[account(
         mut,
         seeds = [OFFSET_TIERS_SEED, state.authority.as_ref()],
-        bump = offset_tiers.bump,
+        bump,
         constraint = offset_tiers.authority == *authority.key @ ErrorCode::InvalidUpdateAuthority,
     )]
     pub offset_tiers: Account<'info, OffsetTiers>,

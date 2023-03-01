@@ -9,6 +9,7 @@ pub fn create_offset_metadata_account<'a>(
     mint: Pubkey,
     pda: AccountInfo<'a>,
     system: &Program<'a, System>,
+    bump: u8
 ) -> Result<()> {
     let rent = Rent::get()?;
     let offset_metadata_lamports = rent.minimum_balance(OffsetMetadata::SPACE);
@@ -21,13 +22,13 @@ pub fn create_offset_metadata_account<'a>(
         program_id,
     );
 
-    let seed = &[OFFSET_METADATA_SEED, mint.as_ref()][..];
+    let seed = &[OFFSET_METADATA_SEED, mint.as_ref(), &[bump]];
 
     // Send the system instruction to the runtime for processing
     solana_program::program::invoke_signed(
         &account,
         &[payer, pda, system.to_account_info()],
-        &[seed],
+        &[&seed[..]],
     )?;
 
     Ok(())

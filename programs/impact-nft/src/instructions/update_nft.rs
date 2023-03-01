@@ -7,7 +7,7 @@ use anchor_lang::prelude::*;
 use anchor_spl::token::{Mint, Token, TokenAccount};
 
 #[derive(Accounts)]
-pub struct MintNFT<'info> {
+pub struct UpdateNft<'info> {
     #[account(mut)]
     pub mint_authority: Signer<'info>,
     #[account(mut)]
@@ -28,7 +28,7 @@ pub struct MintNFT<'info> {
     #[account(
         mut,
         seeds = [OFFSET_TIERS_SEED, mint_authority.key().as_ref()],
-        bump = offset_tiers.bump,
+        bump,
         constraint = offset_tiers.authority == mint_authority.key() @ ErrorCode::InvalidUpdateAuthority,
     )]
     pub offset_tiers: Account<'info, OffsetTiers>,
@@ -42,7 +42,7 @@ pub struct MintNFT<'info> {
 }
 
 /** TODO: review edge cases */
-pub fn update_nft(ctx: Context<MintNFT>, offset_amount: u64) -> Result<()> {
+pub fn update_nft_handler(ctx: Context<UpdateNft>, offset_amount: u64) -> Result<()> {
     let mint = &ctx.accounts.mint;
     let mint_authority = &ctx.accounts.mint_authority;
     let offset_metadata = &ctx.accounts.offset_metadata;

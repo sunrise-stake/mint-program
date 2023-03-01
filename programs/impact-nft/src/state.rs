@@ -40,6 +40,7 @@ pub struct OffsetTiers {
     pub bump: u8,
 }
 
+#[derive(AnchorSerialize, AnchorDeserialize)]
 pub struct OffsetTiersInput {
     pub authority: Pubkey,
     pub levels: Vec<Level>,
