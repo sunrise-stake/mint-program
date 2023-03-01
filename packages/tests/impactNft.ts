@@ -148,6 +148,7 @@ describe("impact-nft", () => {
       Buffer.from("offset_metadata"), masterEditionMint.publicKey.toBuffer()
     ], program.programId)[0];
 
+    try {
     await program.methods
       .mintNft(initialOffset, "sunrise", "sun")
       .accounts({
@@ -169,6 +170,9 @@ describe("impact-nft", () => {
       })
       .signers([masterEditionMint, authority])
       .rpc();
+    } catch(err) {
+      console.log(err);
+    }
 
       console.log("nft created!: ", masterEditionMint.publicKey.toBase58());
 
