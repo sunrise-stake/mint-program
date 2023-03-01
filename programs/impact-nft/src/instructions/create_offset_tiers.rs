@@ -1,6 +1,6 @@
-use anchor_lang::prelude::*;
-use crate::state::{GlobalState, OffsetTiers, OffsetTiersInput};
 use crate::seeds::{GLOBAL_STATE_SEED, OFFSET_TIERS_SEED};
+use crate::state::{GlobalState, OffsetTiers, OffsetTiersInput};
+use anchor_lang::prelude::*;
 
 #[derive(Accounts, Clone)]
 #[instruction(state: OffsetTiersInput)]

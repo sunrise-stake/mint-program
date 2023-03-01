@@ -3,7 +3,6 @@ use anchor_lang::solana_program::program::invoke;
 use anchor_lang::solana_program::system_instruction::create_account;
 use anchor_spl::associated_token::AssociatedToken;
 use anchor_spl::token::{self, Token};
-use crate::instructions::MintNft;
 
 pub fn create_mint<'a>(
     payer: &AccountInfo<'a>,
@@ -38,8 +37,7 @@ pub fn create_mint<'a>(
     token::initialize_mint(cpi_ctx, 0, mint_authority.key, Some(mint_authority.key))
 }
 
-
-pub fn mint_to<'a> (
+pub fn mint_to<'a>(
     token_program: &Program<'a, token::Token>,
     mint: &AccountInfo<'a>,
     mint_authority: &AccountInfo<'a>,
@@ -69,17 +67,17 @@ pub fn create_token_account<'a>(
     token_program: &Program<'a, Token>,
 ) -> Result<()> {
     msg!("Creating buyer's nft token account");
-        anchor_spl::associated_token::create(CpiContext::new(
-            associated_token_program.to_account_info(),
-            anchor_spl::associated_token::Create {
-                payer: payer.to_account_info(),
-                associated_token: token_account.to_account_info(),
-                authority: token_account_owner.to_account_info(),
-                mint: mint.to_account_info(),
-                system_program: system_program.to_account_info(),
-                token_program: token_program.to_account_info(),
-            },
-        ))?;
+    anchor_spl::associated_token::create(CpiContext::new(
+        associated_token_program.to_account_info(),
+        anchor_spl::associated_token::Create {
+            payer: payer.to_account_info(),
+            associated_token: token_account.to_account_info(),
+            authority: token_account_owner.to_account_info(),
+            mint: mint.to_account_info(),
+            system_program: system_program.to_account_info(),
+            token_program: token_program.to_account_info(),
+        },
+    ))?;
 
     Ok(())
 }

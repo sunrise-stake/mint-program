@@ -1,15 +1,15 @@
 use crate::error::ErrorCode;
-use crate::seeds::{GLOBAL_STATE_SEED, OFFSET_TIERS_SEED, OFFSET_METADATA_SEED};
-use crate::state::{GlobalState, OffsetMetadata, OffsetTiers};
+use crate::seeds::{GLOBAL_STATE_SEED, OFFSET_METADATA_SEED, OFFSET_TIERS_SEED};
+use crate::state::{GlobalState, OffsetTiers};
 use crate::utils::metaplex::{
     create_master_edition_account, create_metadata_account, set_metadata_uri,
 };
 use crate::utils::offset::set_offset_metadata;
 use crate::utils::system::create_offset_metadata_account;
-use crate::utils::token::{ create_mint, create_token_account, mint_to };
+use crate::utils::token::{create_mint, create_token_account, mint_to};
 use anchor_lang::prelude::*;
-use anchor_spl::token::{Mint, Token, TokenAccount};
 use anchor_spl::associated_token::AssociatedToken;
+use anchor_spl::token::Token;
 
 #[derive(Accounts)]
 pub struct MintNft<'info> {
@@ -58,7 +58,7 @@ pub struct MintNft<'info> {
         seeds = [OFFSET_METADATA_SEED, mint.key().as_ref()],
         bump
     )]
-    pub offset_metadata: UncheckedAccount<'info>, // Otherwise it fails here for an uninitialized account
+    pub offset_metadata: UncheckedAccount<'info>, // so it doesn't fail here for uninitialized accounts
 }
 
 /** TODO: add offset update logic */
@@ -75,7 +75,7 @@ pub fn mint_nft_handler(
     let token_program = &ctx.accounts.token_program;
     let token_metadata_program = &ctx.accounts.token_metadata_program;
     let rent = &ctx.accounts.rent;
-    let offset_metadata = &ctx.accounts.offset_metadata;
+    let offset_metadata = &mut ctx.accounts.offset_metadata;
     let offset_tiers = &mut ctx.accounts.offset_tiers;
     let metadata = &mut ctx.accounts.metadata;
     let master_edition = &mut ctx.accounts.master_edition;
@@ -85,12 +85,12 @@ pub fn mint_nft_handler(
     }
 
     if **ctx.accounts.mint.to_account_info().try_borrow_lamports()? > 0 {
-        let offset_metadata = Account::<'_, OffsetMetadata>::try_from(offset_metadata)?;
         set_offset_metadata(
             &mint.to_account_info(),
             &mint_authority.to_account_info(),
-            &offset_metadata,
+            offset_metadata,
             offset_amount,
+            *ctx.bumps.get("offset_metadata").unwrap(),
         )?;
         set_metadata_uri(offset_tiers, &metadata.to_account_info(), offset_amount)?;
     } else {
@@ -98,7 +98,7 @@ pub fn mint_nft_handler(
         create_mint(
             &payer.to_account_info(),
             &mint.to_account_info(),
-            &mint_authority,
+            mint_authority,
             system_program,
             token_program,
             &rent.to_account_info(),
@@ -158,17 +158,16 @@ pub fn mint_nft_handler(
             mint.key(),
             offset_metadata.to_account_info(),
             system_program,
-            *ctx.bumps.get("offset_metadata").unwrap()
+            *ctx.bumps.get("offset_metadata").unwrap(),
         )?;
 
         msg!("setting offset metadata");
-        let offset_metadata = Account::<'_, OffsetMetadata>::try_from(offset_metadata)?;
-
         set_offset_metadata(
             &mint.to_account_info(),
             &mint_authority.to_account_info(),
-            &offset_metadata,
+            offset_metadata,
             offset_amount,
+            *ctx.bumps.get("offset_metadata").unwrap(),
         )?;
     }
 

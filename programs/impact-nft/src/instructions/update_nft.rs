@@ -35,7 +35,7 @@ pub struct UpdateNft<'info> {
     #[account(
         mut,
         seeds = [OFFSET_METADATA_SEED, mint.key().as_ref()],
-        bump = offset_metadata.bump,
+        bump,
         constraint = offset_metadata.authority == mint_authority.key() @ ErrorCode::InvalidUpdateAuthority,
     )]
     pub offset_metadata: Account<'info, OffsetMetadata>,
@@ -58,8 +58,9 @@ pub fn update_nft_handler(ctx: Context<UpdateNft>, offset_amount: u64) -> Result
         set_offset_metadata(
             &mint.to_account_info(),
             &mint_authority.to_account_info(),
-            offset_metadata,
+            &offset_metadata.to_account_info(),
             offset_amount,
+            *ctx.bumps.get("offset_metadata").unwrap(),
         )?;
         set_metadata_uri(offset_tiers, &metadata.to_account_info(), offset_amount)?;
     } else {

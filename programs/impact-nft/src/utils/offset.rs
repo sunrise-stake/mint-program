@@ -1,5 +1,3 @@
-use crate::error::ErrorCode;
-use crate::seeds::OFFSET_METADATA_SEED;
 use crate::state::OffsetMetadata;
 use anchor_lang::prelude::*;
 
@@ -7,26 +5,22 @@ use anchor_lang::prelude::*;
 pub fn set_offset_metadata<'a>(
     mint: &AccountInfo<'a>,
     mint_authority: &AccountInfo<'a>,
-    offset_metadata: &Account<'a, OffsetMetadata>,
+    offset_metadata: &AccountInfo<'a>,
     offset_amount: u64,
+    offset_metadata_bump: u8,
 ) -> Result<()> {
-    
-    let (offset_metadata_pubkey, offset_metadata_bump) =
-        Pubkey::find_program_address(&[OFFSET_METADATA_SEED, mint.key().as_ref()], &crate::ID);
-
-    if offset_metadata_pubkey != offset_metadata.key() {
-        return Err(ErrorCode::InvalidOffsetMetadata.into());
-    }
-    // Moved checks to the validator 
+    // Checked in validator
 
     /* set offset metadata */
-    msg!("actually setting metadata");
-    offset_metadata.clone().set(
+    let mut offset_metadata_owned = Account::<'a, OffsetMetadata>::try_from(offset_metadata)?;
+    offset_metadata_owned.set(
         mint_authority.key(),
         mint.key(),
         offset_amount,
         offset_metadata_bump,
     );
 
+    // Serialize changes back into account, skipping the space allocated to discriminator
+    offset_metadata_owned.serialize(&mut &mut offset_metadata.data.borrow_mut()[8..])?;
     Ok(())
 }
