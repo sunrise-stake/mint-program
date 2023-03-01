@@ -24,6 +24,7 @@ pub struct CreateNft<'info> {
     pub metadata: UncheckedAccount<'info>,
     #[account(mut)]
     pub token_account: Account<'info, TokenAccount>,
+    /// CHECK: Checked in metaplex program
     pub token_metadata_program: UncheckedAccount<'info>,
     pub system_program: Program<'info, System>,
     pub rent: Sysvar<'info, Rent>,
@@ -50,7 +51,7 @@ pub struct CreateNft<'info> {
 
 /** TODO: add offset update logic */
 pub fn mint_nft(
-    ctx: Context<MintNFT>,
+    ctx: Context<CreateNft>,
     offset_amount: u64,
     name: String,
     symbol: String,

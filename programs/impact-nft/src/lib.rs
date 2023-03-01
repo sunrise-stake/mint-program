@@ -12,7 +12,7 @@ pub mod utils;
 pub mod instructions;
 use instructions::*;
 
-declare_id!("Fg6PaFpoGXkYsidMpWTK6W2BeZ7FEfcYkg476zPFsLnS");
+declare_id!("SUNFT6ErsQvMcDzMcGyndq2P31wYCFs6G6WEcoyGkGc");
 
 #[program]
 pub mod impact_nft {
