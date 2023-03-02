@@ -12,7 +12,6 @@ pub struct GlobalState {
 pub struct GlobalStateInput {
     pub authority: Pubkey,
     pub levels: u16,
-    pub bump: u8,
 }
 
 impl GlobalState {

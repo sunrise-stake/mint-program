@@ -4,14 +4,14 @@ use anchor_lang::prelude::*;
 
 #[derive(Accounts, Clone)]
 #[instruction(state: GlobalStateInput)]
-pub struct CreateGlobalState<'info> {
+pub struct UpdateGlobalState<'info> {
     #[account(
         mut
-        constraint = authority.key() == state.authority @ ErrorCode::InvalidUpdateAuthority,
+        constraint = authority.key() == global_state.authority @ ErrorCode::InvalidUpdateAuthority,
     )]
     pub authority: Signer<'info>,
     #[account(
-        seeds = [GLOBAL_STATE_SEED, state.authority.as_ref()],
+        seeds = [GLOBAL_STATE_SEED, global_state.authority.as_ref()],
         bump,
         payer = authority,
         space = GlobalState::SPACE,
@@ -20,7 +20,7 @@ pub struct CreateGlobalState<'info> {
     pub system_program: Program<'info, System>,
 }
 
-pub fn create_global_state_handler(
+pub fn update_global_state_handler(
     ctx: Context<CreateGlobalState>,
     state: GlobalStateInput,
 ) -> Result<()> {

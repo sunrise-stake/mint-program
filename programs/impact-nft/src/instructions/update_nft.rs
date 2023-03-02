@@ -4,7 +4,7 @@ use crate::state::{GlobalState, OffsetMetadata, OffsetTiers};
 use crate::utils::metaplex::set_metadata_uri;
 use crate::utils::offset::set_offset_metadata;
 use anchor_lang::prelude::*;
-use anchor_spl::token::{Mint, Token};
+use anchor_spl::token::{Mint, Token, TokenAccount};
 
 #[derive(Accounts)]
 pub struct UpdateNFT<'info> {
@@ -13,14 +13,12 @@ pub struct UpdateNFT<'info> {
     #[account(mut)]
     pub mint: Account<'info, Mint>,
     pub token_program: Program<'info, Token>,
+    /// CHECK: Checked in metaplex program
     #[account(mut)]
     /// CHECK: Checked by metaplex (TODO ?)
-    pub metadata: AccountInfo<'info>,
+    pub metadata: UncheckedAccount<'info>,
     #[account(mut)]
-    /// CHECK: Checked by metaplex (TODO ?)
-    pub token_account: UncheckedAccount<'info>,
-    #[account(mut)]
-    pub payer: Signer<'info>,
+    pub token_account: Account<'info, TokenAccount>,
     #[account(
         mut,
         seeds = [GLOBAL_STATE_SEED, mint_authority.key().as_ref()],

@@ -8,28 +8,31 @@ use crate::utils::offset::set_offset_metadata;
 use crate::utils::system::create_offset_metadata_account;
 use crate::utils::token::create_mint;
 use anchor_lang::prelude::*;
-use anchor_spl::token::{Mint, Token};
+use anchor_spl::token::{Mint, Token, TokenAccount};
 
 #[derive(Accounts)]
-pub struct MintNFT<'info> {
+pub struct CreateNft<'info> {
+    #[account(mut)]
+    pub payer: Signer<'info>,
     #[account(mut)]
     pub mint_authority: Signer<'info>,
     #[account(mut)]
     pub mint: Account<'info, Mint>,
     pub token_program: Program<'info, Token>,
+    /// CHECK: Checked in metaplex program
     #[account(mut)]
     /// CHECK: Checked by metaplex (TODO ?)
-    pub metadata: AccountInfo<'info>,
+    pub metadata: UncheckedAccount<'info>,
     #[account(mut)]
-    /// CHECK: Created by metaplex (TODO ?)
-    pub token_account: UncheckedAccount<'info>,
-    /// CHECK: Checked by metaplex (TODO ?)
+    pub token_account: Account<'info, TokenAccount>,
+    /// CHECK: Checked in metaplex program
     pub token_metadata_program: UncheckedAccount<'info>,
     #[account(mut)]
     pub payer: Signer<'info>,
     pub system_program: Program<'info, System>,
     /// CHECK: TODO fix
-    pub rent: AccountInfo<'info>,
+    pub rent: Sysvar<'info, Rent>,
+    /// CHECK: Checked in metaplex program
     #[account(mut)]
     /// CHECK: Checked by metaplex (TODO ?)
     pub master_edition: UncheckedAccount<'info>,
@@ -53,7 +56,7 @@ pub struct MintNFT<'info> {
 
 /** TODO: add offset update logic */
 pub fn mint_nft_handler(
-    ctx: Context<MintNFT>,
+    ctx: Context<CreateNft>,
     offset_amount: u64,
     name: String,
     symbol: String,
@@ -70,7 +73,6 @@ pub fn mint_nft_handler(
     let metadata = &mut ctx.accounts.metadata;
     let master_edition = &mut ctx.accounts.master_edition;
 
-    // TODO: check that offset_tiers.levels.len() > 0
     if offset_tiers.levels.is_empty() {
         return Err(ErrorCode::NoOffsetTiers.into());
     }

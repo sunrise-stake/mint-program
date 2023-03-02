@@ -7,11 +7,13 @@ use anchor_lang::prelude::*;
 pub struct CreateGlobalState<'info> {
     #[account(mut)]
     pub authority: Signer<'info>,
+    #[account(mut)]
+    pub payer: Signer<'info>,
     #[account(
         init,
         seeds = [GLOBAL_STATE_SEED, state.authority.as_ref()],
         bump,
-        payer = authority,
+        payer = payer,
         space = GlobalState::SPACE,
     )]
     pub global_state: Account<'info, GlobalState>,
