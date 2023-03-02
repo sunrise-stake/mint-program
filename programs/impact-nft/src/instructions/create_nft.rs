@@ -2,7 +2,7 @@ use crate::error::ErrorCode;
 use crate::seeds::{GLOBAL_STATE_SEED, OFFSET_METADATA_SEED, OFFSET_TIERS_SEED};
 use crate::state::{GlobalState, OffsetTiers};
 use crate::utils::metaplex::{
-    create_master_edition_account, create_metadata_account, set_metadata_uri,
+    create_master_edition_account, create_metadata_account,
 };
 use crate::utils::offset::set_offset_metadata;
 use crate::utils::system::create_offset_metadata_account;
@@ -84,92 +84,80 @@ pub fn mint_nft_handler(
         return Err(ErrorCode::NoOffsetTiers.into());
     }
 
-    if **ctx.accounts.mint.to_account_info().try_borrow_lamports()? > 0 {
-        set_offset_metadata(
-            &mint.to_account_info(),
-            &mint_authority.to_account_info(),
-            offset_metadata,
-            offset_amount,
-            *ctx.bumps.get("offset_metadata").unwrap(),
-        )?;
-        set_metadata_uri(offset_tiers, &metadata.to_account_info(), offset_amount)?;
-    } else {
-        msg!("creating mint");
-        create_mint(
-            &payer.to_account_info(),
-            &mint.to_account_info(),
-            mint_authority,
-            system_program,
-            token_program,
-            &rent.to_account_info(),
-        )?;
+    msg!("creating mint");
+    create_mint(
+        &payer.to_account_info(),
+        &mint.to_account_info(),
+        mint_authority,
+        system_program,
+        token_program,
+        &rent.to_account_info(),
+    )?;
 
-        create_token_account(
-            &ctx.accounts.associated_token_program,
-            payer,
-            &ctx.accounts.mint_nft_to,
-            &ctx.accounts.mint_nft_to_owner,
-            &ctx.accounts.mint,
-            &ctx.accounts.system_program,
-            &ctx.accounts.token_program,
-        )?;
+    create_token_account(
+        &ctx.accounts.associated_token_program,
+        payer,
+        &ctx.accounts.mint_nft_to,
+        &ctx.accounts.mint_nft_to_owner,
+        &ctx.accounts.mint,
+        &ctx.accounts.system_program,
+        &ctx.accounts.token_program,
+    )?;
 
-        mint_to(
-            token_program,
-            mint,
-            mint_authority,
-            &ctx.accounts.mint_nft_to,
-        )?;
+    mint_to(
+        token_program,
+        mint,
+        mint_authority,
+        &ctx.accounts.mint_nft_to,
+    )?;
 
-        msg!("creating metadata account");
-        create_metadata_account(
-            name,
-            symbol,
-            offset_tiers.levels[0].uri.to_string(),
-            &metadata.to_account_info(),
-            &mint.to_account_info(),
-            &mint_authority.to_account_info(),
-            &payer.to_account_info(),
-            &mint_authority.to_account_info(),
-            token_metadata_program,
-            system_program,
-            &rent.to_account_info(),
-        )?;
+    msg!("creating metadata account");
+    create_metadata_account(
+        name,
+        symbol,
+        offset_tiers.levels[0].uri.to_string(),
+        &metadata.to_account_info(),
+        &mint.to_account_info(),
+        &mint_authority.to_account_info(),
+        &payer.to_account_info(),
+        &mint_authority.to_account_info(),
+        token_metadata_program,
+        system_program,
+        &rent.to_account_info(),
+    )?;
 
-        msg!("creating master edition account");
-        // TODO: add global state authority as mint authority and update authority
-        create_master_edition_account(
-            mint_authority,
-            master_edition,
-            mint,
-            mint_authority,
-            payer,
-            metadata,
-            token_metadata_program,
-            system_program,
-            &ctx.accounts.rent.to_account_info(),
-        )?;
+    msg!("creating master edition account");
+    // TODO: add global state authority as mint authority and update authority
+    create_master_edition_account(
+        mint_authority,
+        master_edition,
+        mint,
+        mint_authority,
+        payer,
+        metadata,
+        token_metadata_program,
+        system_program,
+        &ctx.accounts.rent.to_account_info(),
+    )?;
 
-        msg!("creating offset metadata account");
+    msg!("creating offset metadata account");
 
-        create_offset_metadata_account(
-            &crate::ID,
-            payer.to_account_info(),
-            mint.key(),
-            offset_metadata.to_account_info(),
-            system_program,
-            *ctx.bumps.get("offset_metadata").unwrap(),
-        )?;
+    create_offset_metadata_account(
+        &crate::ID,
+        payer.to_account_info(),
+        mint.key(),
+        offset_metadata.to_account_info(),
+        system_program,
+        *ctx.bumps.get("offset_metadata").unwrap(),
+    )?;
 
-        msg!("setting offset metadata");
-        set_offset_metadata(
-            &mint.to_account_info(),
-            &mint_authority.to_account_info(),
-            offset_metadata,
-            offset_amount,
-            *ctx.bumps.get("offset_metadata").unwrap(),
-        )?;
-    }
-
+    msg!("setting offset metadata");
+    set_offset_metadata(
+        &mint.to_account_info(),
+        &mint_authority.to_account_info(),
+        offset_metadata,
+        offset_amount,
+        *ctx.bumps.get("offset_metadata").unwrap(),
+    )?;
     Ok(())
 }
