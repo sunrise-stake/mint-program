@@ -1,7 +1,7 @@
-use anchor_lang::prelude::*;
-use crate::state::{GlobalState, OffsetTiers, OffsetTiersInput};
-use crate::seeds::{GLOBAL_STATE_SEED, OFFSET_TIERS_SEED};
 use crate::error::ErrorCode;
+use crate::seeds::{GLOBAL_STATE_SEED, OFFSET_TIERS_SEED};
+use crate::state::{GlobalState, OffsetTiers, OffsetTiersInput};
+use anchor_lang::prelude::*;
 
 #[derive(Accounts, Clone)]
 #[instruction(state: OffsetTiersInput)]
@@ -17,7 +17,7 @@ pub struct UpdateOffsetTiers<'info> {
     #[account(
         mut,
         seeds = [OFFSET_TIERS_SEED, state.authority.as_ref()],
-        bump = offset_tiers.bump,
+        bump,
         constraint = offset_tiers.authority == *authority.key @ ErrorCode::InvalidUpdateAuthority,
     )]
     pub offset_tiers: Account<'info, OffsetTiers>,

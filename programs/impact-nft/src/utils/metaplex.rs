@@ -30,15 +30,15 @@ pub fn create_metadata_account<'a>(
     ];
 
     let creator = vec![
-        mpl_token_metadata::state::Creator {
+        /*mpl_token_metadata::state::Creator {
             address: payer.key(),
             verified: false,
             share: 100,
-        },
+        },*/
         mpl_token_metadata::state::Creator {
             address: mint_authority.key(),
             verified: false,
-            share: 0,
+            share: 100,
         },
     ];
 
@@ -84,9 +84,19 @@ pub fn create_master_edition_account<'a>(
         mint_authority.clone(),
         payer.clone(),
         metadata.clone(),
-        system_program.to_account_info().clone(),
+        system_program.to_account_info(),
         rent.clone(),
     ];
+    /*let accounts = vec![
+        master_edition.clone(),
+        mint.clone(),
+        update_authority.clone(),
+        mint_authority.clone(),
+        metadata.clone(),
+        payer.clone(),
+        system_program.to_account_info(),
+        rent.clone(),
+    ];*/
 
     invoke(
         &create_master_edition_v3(

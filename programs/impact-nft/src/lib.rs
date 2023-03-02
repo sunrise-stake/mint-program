@@ -25,6 +25,27 @@ pub mod impact_nft {
         create_global_state_handler(ctx, input)
     }
 
+    pub fn update_global_state(
+        ctx: Context<UpdateGlobalState>,
+        input: GlobalStateInput,
+    ) -> Result<()> {
+        update_global_state_handler(ctx, input)
+    }
+
+    pub fn create_offset_tiers(
+        ctx: Context<CreateOffsetTiers>,
+        input: OffsetTiersInput,
+    ) -> Result<()> {
+        create_offset_tiers_handler(ctx, input)
+    }
+
+    pub fn update_offset_tiers(
+        ctx: Context<UpdateOffsetTiers>,
+        input: OffsetTiersInput,
+    ) -> Result<()> {
+        update_offset_tiers_handler(ctx, input)
+    }
+
     pub fn mint_nft(
         ctx: Context<MintNft>,
         offset_amount: u64,
@@ -33,7 +54,8 @@ pub mod impact_nft {
     ) -> Result<()> {
         mint_nft_handler(ctx, offset_amount, name, symbol)
     }
-}
 
-#[derive(Accounts)]
-pub struct Initialize {}
+    pub fn update_nft(ctx: Context<UpdateNft>, offset_amount: u64) -> Result<()> {
+        update_nft_handler(ctx, offset_amount)
+    }
+}
