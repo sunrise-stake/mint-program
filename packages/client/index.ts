@@ -47,7 +47,7 @@ export class ImpactNftClient {
       levels: state.levels as number,
     };
 
-    this.stateAddress = stateAddress
+    this.stateAddress = stateAddress;
   }
 
   public static getGlobalStateAddress(authority: PublicKey): PublicKey {

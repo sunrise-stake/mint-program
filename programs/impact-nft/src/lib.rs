@@ -26,7 +26,7 @@ pub mod impact_nft {
     }
 
     pub fn mint_nft(
-        ctx: Context<MintNFT>,
+        ctx: Context<MintNft>,
         offset_amount: u64,
         name: String,
         symbol: String,

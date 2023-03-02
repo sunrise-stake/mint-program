@@ -12,9 +12,9 @@ describe("impact-nft", () => {
     // TODO TEMP
     const state = {
       authority: anchor.web3.Keypair.generate().publicKey,
-        levels: 10,
-        bump: 0,
-    }
+      levels: 10,
+      bump: 0,
+    };
     const tx = await program.methods.createGlobalState(state).rpc();
     console.log("Your transaction signature", tx);
   });

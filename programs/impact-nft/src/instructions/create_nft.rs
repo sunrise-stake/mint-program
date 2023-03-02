@@ -21,20 +21,15 @@ pub struct CreateNft<'info> {
     pub token_program: Program<'info, Token>,
     /// CHECK: Checked in metaplex program
     #[account(mut)]
-    /// CHECK: Checked by metaplex (TODO ?)
     pub metadata: UncheckedAccount<'info>,
     #[account(mut)]
     pub token_account: Account<'info, TokenAccount>,
     /// CHECK: Checked in metaplex program
     pub token_metadata_program: UncheckedAccount<'info>,
-    #[account(mut)]
-    pub payer: Signer<'info>,
     pub system_program: Program<'info, System>,
-    /// CHECK: TODO fix
     pub rent: Sysvar<'info, Rent>,
     /// CHECK: Checked in metaplex program
     #[account(mut)]
-    /// CHECK: Checked by metaplex (TODO ?)
     pub master_edition: UncheckedAccount<'info>,
     #[account(
         mut,
