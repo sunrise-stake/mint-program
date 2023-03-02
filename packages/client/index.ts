@@ -1,12 +1,8 @@
-import { AnchorProvider, Program } from "@project-serum/anchor";
-import * as anchor from "@project-serum/anchor";
+import { AnchorProvider, Program } from "@coral-xyz/anchor";
+import * as anchor from "@coral-xyz/anchor";
 import { PublicKey, Keypair, SystemProgram, Connection } from "@solana/web3.js";
 import { ImpactNft, IDL } from "../types/impact_nft";
-import {
-  ASSOCIATED_TOKEN_PROGRAM_ID,
-  TOKEN_PROGRAM_ID,
-  getAssociatedTokenAddressSync,
-} from "@solana/spl-token";
+import { getAssociatedTokenAddressSync } from "@solana/spl-token";
 
 const TOKEN_METADATA_PROGRAM_ID = new PublicKey(
   "metaqbxxUerdq28cj1RbAWkYQm3ybzjb6a8bt518x1s"
@@ -16,7 +12,7 @@ export const PROGRAM_ID = new PublicKey(
   "SUNFT6ErsQvMcDzMcGyndq2P31wYCFs6G6WEcoyGkGc"
 );
 
-interface levels {
+interface Level {
   offset: anchor.BN;
   uri: string;
 }
@@ -136,7 +132,7 @@ export class ImpactNftClient {
 
   public static async registerOffsetTiers(
     authority: PublicKey,
-    levels: levels[]
+    levels: Level[]
   ): Promise<ImpactNftClient> {
     // get state account
     const globalState = this.getGlobalStateAddress(authority);
