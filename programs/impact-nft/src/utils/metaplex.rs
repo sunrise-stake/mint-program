@@ -87,16 +87,6 @@ pub fn create_master_edition_account<'a>(
         system_program.to_account_info(),
         rent.clone(),
     ];
-    /*let accounts = vec![
-        master_edition.clone(),
-        mint.clone(),
-        update_authority.clone(),
-        mint_authority.clone(),
-        metadata.clone(),
-        payer.clone(),
-        system_program.to_account_info(),
-        rent.clone(),
-    ];*/
 
     invoke(
         &create_master_edition_v3(

@@ -6,11 +6,6 @@ export type ImpactNft = {
       "name": "createGlobalState",
       "accounts": [
         {
-          "name": "authority",
-          "isMut": true,
-          "isSigner": true
-        },
-        {
           "name": "payer",
           "isMut": true,
           "isSigner": true
@@ -18,7 +13,7 @@ export type ImpactNft = {
         {
           "name": "globalState",
           "isMut": true,
-          "isSigner": false
+          "isSigner": true
         },
         {
           "name": "systemProgram",
@@ -45,7 +40,7 @@ export type ImpactNft = {
         },
         {
           "name": "globalState",
-          "isMut": false,
+          "isMut": true,
           "isSigner": false
         },
         {
@@ -68,6 +63,11 @@ export type ImpactNft = {
       "accounts": [
         {
           "name": "authority",
+          "isMut": true,
+          "isSigner": true
+        },
+        {
+          "name": "payer",
           "isMut": true,
           "isSigner": true
         },
@@ -133,7 +133,7 @@ export type ImpactNft = {
           "isSigner": true
         },
         {
-          "name": "mintAuthority",
+          "name": "authority",
           "isMut": true,
           "isSigner": true
         },
@@ -222,7 +222,7 @@ export type ImpactNft = {
       "name": "updateNft",
       "accounts": [
         {
-          "name": "mintAuthority",
+          "name": "authority",
           "isMut": true,
           "isSigner": true
         },
@@ -283,13 +283,6 @@ export type ImpactNft = {
           {
             "name": "levels",
             "type": "u16"
-          },
-          {
-            "name": "bump",
-            "docs": [
-              "number of levels, can probably be capped at u8 or u16"
-            ],
-            "type": "u8"
           }
         ]
       }
@@ -432,11 +425,6 @@ export const IDL: ImpactNft = {
       "name": "createGlobalState",
       "accounts": [
         {
-          "name": "authority",
-          "isMut": true,
-          "isSigner": true
-        },
-        {
           "name": "payer",
           "isMut": true,
           "isSigner": true
@@ -444,7 +432,7 @@ export const IDL: ImpactNft = {
         {
           "name": "globalState",
           "isMut": true,
-          "isSigner": false
+          "isSigner": true
         },
         {
           "name": "systemProgram",
@@ -471,7 +459,7 @@ export const IDL: ImpactNft = {
         },
         {
           "name": "globalState",
-          "isMut": false,
+          "isMut": true,
           "isSigner": false
         },
         {
@@ -494,6 +482,11 @@ export const IDL: ImpactNft = {
       "accounts": [
         {
           "name": "authority",
+          "isMut": true,
+          "isSigner": true
+        },
+        {
+          "name": "payer",
           "isMut": true,
           "isSigner": true
         },
@@ -559,7 +552,7 @@ export const IDL: ImpactNft = {
           "isSigner": true
         },
         {
-          "name": "mintAuthority",
+          "name": "authority",
           "isMut": true,
           "isSigner": true
         },
@@ -648,7 +641,7 @@ export const IDL: ImpactNft = {
       "name": "updateNft",
       "accounts": [
         {
-          "name": "mintAuthority",
+          "name": "authority",
           "isMut": true,
           "isSigner": true
         },
@@ -709,13 +702,6 @@ export const IDL: ImpactNft = {
           {
             "name": "levels",
             "type": "u16"
-          },
-          {
-            "name": "bump",
-            "docs": [
-              "number of levels, can probably be capped at u8 or u16"
-            ],
-            "type": "u8"
           }
         ]
       }

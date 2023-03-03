@@ -3,9 +3,9 @@ use anchor_lang::prelude::*;
 #[account]
 pub struct GlobalState {
     pub authority: Pubkey,
+    // number of levels, can probably be capped at u8 or u16 
     pub levels: u16,
-    /** number of levels, can probably be capped at u8 or u16 */
-    pub bump: u8,
+    
 }
 
 #[derive(AnchorSerialize, AnchorDeserialize, Clone)]
@@ -15,12 +15,11 @@ pub struct GlobalStateInput {
 }
 
 impl GlobalState {
-    pub const SPACE: usize = 8 + 32 + 2 + 1;
+    pub const SPACE: usize = 8 + 32 + 2;
 
-    pub fn set(&mut self, authority: Pubkey, levels: u16, bump: u8) {
+    pub fn set(&mut self, authority: Pubkey, levels: u16) {
         self.authority = authority;
         self.levels = levels;
-        self.bump = bump;
     }
 }
 

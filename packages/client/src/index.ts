@@ -41,8 +41,36 @@ export class ImpactNftClient {
   readonly program: Program<ImpactNft>;
   stateAddress: PublicKey | undefined;
 
-  constructor(readonly provider: AnchorProvider) {
+  private constructor(readonly provider: AnchorProvider) {
     this.program = new Program<ImpactNft>(IDL, PROGRAM_ID, provider);
+  }
+
+  public static async register(
+    authority: PublicKey,
+    levels: number
+  ): Promise<ImpactNftClient> {
+    const client = new ImpactNftClient(setUpAnchor());
+    const state = Keypair.generate();
+
+    const accounts = {
+      payer: client.provider.publicKey,
+      globalState: state.publicKey,
+      systemProgram: SystemProgram.programId,
+    };
+
+    await client.program.methods
+      .createGlobalState({
+        authority,
+        levels,
+      })
+      .accounts(accounts)
+      .signers([state])
+      .rpc()
+      .then(() => confirm(client.provider.connection));
+
+    await client.init(state.publicKey);
+
+    return client;
   }
 
   private async init(stateAddress: PublicKey): Promise<void> {
@@ -56,21 +84,14 @@ export class ImpactNftClient {
     this.stateAddress = stateAddress;
   }
 
-  public static getGlobalStateAddress(authority: PublicKey): PublicKey {
+  public getOffsetTiersAddress(state: PublicKey): PublicKey {
     return PublicKey.findProgramAddressSync(
-      [Buffer.from("global_state"), authority.toBuffer()],
+      [Buffer.from("offset_tiers"), state.toBuffer()],
       PROGRAM_ID
     )[0];
   }
 
-  public static getOffsetTiersAddress(authority: PublicKey): PublicKey {
-    return PublicKey.findProgramAddressSync(
-      [Buffer.from("offset_tiers"), authority.toBuffer()],
-      PROGRAM_ID
-    )[0];
-  }
-
-  public static getOffsetMetadataAddress(mint: PublicKey): PublicKey {
+  public getOffsetMetadataAddress(mint: PublicKey): PublicKey {
     return PublicKey.findProgramAddressSync(
       [Buffer.from("offset_metadata"), mint.toBuffer()],
       PROGRAM_ID
@@ -78,7 +99,7 @@ export class ImpactNftClient {
   }
 
   /** get metadata account... can't find an easy way to do this via their sdk */
-  public static getMetadataAddress(mint: PublicKey): PublicKey {
+  public getMetadataAddress(mint: PublicKey): PublicKey {
     return PublicKey.findProgramAddressSync(
       [
         Buffer.from("metadata"),
@@ -90,7 +111,7 @@ export class ImpactNftClient {
   }
 
   /** get master edition account... can't find an easy way to do this via their sdk */
-  public static getMasterEditionAddress(mint: PublicKey): PublicKey {
+  public getMasterEditionAddress(mint: PublicKey): PublicKey {
     return PublicKey.findProgramAddressSync(
       [
         Buffer.from("metadata"),
@@ -102,41 +123,11 @@ export class ImpactNftClient {
     )[0];
   }
 
-  public static async register(
-    levels: number
-  ): Promise<ImpactNftClient> {
-    const client = new ImpactNftClient(setUpAnchor());
+  public async registerOffsetTiers(authority: PublicKey, levels: Level[]) {
+    if (!this.stateAddress) throw new Error("Client not initialized");
 
-    const authority = client.provider.publicKey;
-    const state = this.getGlobalStateAddress(authority);
-
-    const accounts = {
-      authority: authority,
-      globalState: state,
-      systemProgram: SystemProgram.programId,
-    };
-
-    await client.program.methods
-      .createGlobalState({
-        authority,
-        levels,
-      })
-      .accounts(accounts)
-      .rpc()
-      .then(() => confirm(client.provider.connection));
-
-    await client.init(state);
-
-    return client;
-  }
-
-  public static async registerOffsetTiers(
-    authority: PublicKey,
-    levels: Level[]
-  ): Promise<ImpactNftClient> {
     // get state account
-    const globalState = this.getGlobalStateAddress(authority);
-    const offsetTiers = this.getOffsetTiersAddress(authority);
+    const offsetTiers = this.getOffsetTiersAddress(this.stateAddress);
 
     const client = new ImpactNftClient(setUpAnchor());
 
@@ -147,51 +138,38 @@ export class ImpactNftClient {
       })
       .accounts({
         authority: client.provider.publicKey,
-        globalState,
+        globalState: this.stateAddress,
         offsetTiers,
         systemProgram: SystemProgram.programId,
       })
       .rpc()
       .then(() => confirm(client.provider.connection));
-
-    await client.init(globalState);
-    return client;
   }
 
-  public static async getMintNftAccounts(
-    authority: PublicKey,
-    holder: PublicKey
-  ): Promise<{
+  public getMintNftAccounts(
+      authority: PublicKey,
+    mint: PublicKey,
+    user: PublicKey
+  ): {
     program: PublicKey;
-    globalState: PublicKey;
     tokenMetadataProgram: PublicKey;
-    mint: Keypair;
     metadata: PublicKey;
     userTokenAccount: PublicKey;
     masterEdition: PublicKey;
     offsetMetadata: PublicKey;
     offsetTiers: PublicKey;
-  }> {
-    // not sure if this should go here or the main sdk
-    const mint = Keypair.generate();
-    const metadata = this.getMetadataAddress(mint.publicKey);
-    const masterEdition = this.getMasterEditionAddress(mint.publicKey);
-    const offsetMetadata = this.getOffsetMetadataAddress(mint.publicKey);
+  } {
+    if (!this.stateAddress) throw new Error("Client not initialized");
 
-    const globalState = this.getGlobalStateAddress(authority);
-    const offsetTiers = this.getOffsetTiersAddress(authority);
-
-    const userTokenAccount = getAssociatedTokenAddressSync(
-      mint.publicKey,
-      holder,
-      true
-    );
+    const metadata = this.getMetadataAddress(mint);
+    const masterEdition = this.getMasterEditionAddress(mint);
+    const offsetMetadata = this.getOffsetMetadataAddress(mint);
+    const offsetTiers = this.getOffsetTiersAddress(this.stateAddress);
+    const userTokenAccount = getAssociatedTokenAddressSync(mint, user, true);
 
     return {
       program: PROGRAM_ID,
-      globalState,
       tokenMetadataProgram: TOKEN_METADATA_PROGRAM_ID,
-      mint,
       metadata,
       userTokenAccount,
       masterEdition,

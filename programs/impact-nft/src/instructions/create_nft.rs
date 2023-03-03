@@ -1,5 +1,5 @@
 use crate::error::ErrorCode;
-use crate::seeds::{GLOBAL_STATE_SEED, OFFSET_METADATA_SEED, OFFSET_TIERS_SEED};
+use crate::seeds::{OFFSET_METADATA_SEED, OFFSET_TIERS_SEED};
 use crate::state::{GlobalState, OffsetTiers};
 use crate::utils::metaplex::{
     create_master_edition_account, create_metadata_account,
@@ -16,7 +16,7 @@ pub struct MintNft<'info> {
     #[account(mut)]
     pub payer: Signer<'info>,
     #[account(mut)]
-    pub mint_authority: Signer<'info>,
+    pub authority: Signer<'info>,
     /// CHECK: Initialized as mint in instruction
     #[account(mut)]
     pub mint: Signer<'info>,
@@ -40,16 +40,13 @@ pub struct MintNft<'info> {
     pub master_edition: UncheckedAccount<'info>,
     #[account(
         mut,
-        seeds = [GLOBAL_STATE_SEED, mint_authority.key().as_ref()],
-        bump = global_state.bump,
-        constraint = global_state.authority == mint_authority.key() @ ErrorCode::InvalidUpdateAuthority,
+        has_one = authority @ ErrorCode::InvalidUpdateAuthority,
     )]
     pub global_state: Account<'info, GlobalState>,
     #[account(
         mut,
-        seeds = [OFFSET_TIERS_SEED, mint_authority.key().as_ref()],
+        seeds = [OFFSET_TIERS_SEED, global_state.key().as_ref()],
         bump,
-        constraint = offset_tiers.authority == mint_authority.key() @ ErrorCode::InvalidUpdateAuthority,
     )]
     pub offset_tiers: Account<'info, OffsetTiers>,
     /// CHECK: Created and/or validated in instruction handler
@@ -69,7 +66,7 @@ pub fn mint_nft_handler(
     symbol: String,
 ) -> Result<()> {
     let mint = &ctx.accounts.mint;
-    let mint_authority = &ctx.accounts.mint_authority;
+    let mint_authority = &ctx.accounts.authority;
     let payer = &ctx.accounts.payer;
     let system_program = &ctx.accounts.system_program;
     let token_program = &ctx.accounts.token_program;

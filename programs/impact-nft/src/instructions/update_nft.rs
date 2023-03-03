@@ -1,5 +1,5 @@
 use crate::error::ErrorCode;
-use crate::seeds::{GLOBAL_STATE_SEED, OFFSET_METADATA_SEED, OFFSET_TIERS_SEED};
+use crate::seeds::{OFFSET_METADATA_SEED, OFFSET_TIERS_SEED};
 use crate::state::{GlobalState, OffsetMetadata, OffsetTiers};
 use crate::utils::metaplex::set_metadata_uri;
 use anchor_lang::prelude::*;
@@ -8,7 +8,7 @@ use anchor_spl::token::{Mint, Token, TokenAccount};
 #[derive(Accounts)]
 pub struct UpdateNft<'info> {
     #[account(mut)]
-    pub mint_authority: Signer<'info>,
+    pub authority: Signer<'info>,
     #[account(mut)]
     pub mint: Account<'info, Mint>,
     pub token_program: Program<'info, Token>,
@@ -19,23 +19,20 @@ pub struct UpdateNft<'info> {
     pub token_account: Account<'info, TokenAccount>,
     #[account(
         mut,
-        seeds = [GLOBAL_STATE_SEED, mint_authority.key().as_ref()],
-        bump = global_state.bump,
-        constraint = global_state.authority == mint_authority.key() @ ErrorCode::InvalidUpdateAuthority,
+        has_one = authority @ ErrorCode::InvalidUpdateAuthority,
     )]
     pub global_state: Account<'info, GlobalState>,
     #[account(
         mut,
-        seeds = [OFFSET_TIERS_SEED, mint_authority.key().as_ref()],
+        seeds = [OFFSET_TIERS_SEED, global_state.key().as_ref()],
         bump,
-        constraint = offset_tiers.authority == mint_authority.key() @ ErrorCode::InvalidUpdateAuthority,
     )]
     pub offset_tiers: Account<'info, OffsetTiers>,
     #[account(
         mut,
         seeds = [OFFSET_METADATA_SEED, mint.key().as_ref()],
         bump,
-        constraint = offset_metadata.authority == mint_authority.key() @ ErrorCode::InvalidUpdateAuthority,
+        has_one = authority @ ErrorCode::InvalidUpdateAuthority,
     )]
     pub offset_metadata: Account<'info, OffsetMetadata>,
 }
@@ -43,7 +40,7 @@ pub struct UpdateNft<'info> {
 /** TODO: review edge cases */
 pub fn update_nft_handler(ctx: Context<UpdateNft>, offset_amount: u64) -> Result<()> {
     let mint = &ctx.accounts.mint;
-    let mint_authority = &ctx.accounts.mint_authority;
+    let mint_authority = &ctx.accounts.authority;
     let offset_metadata = &mut ctx.accounts.offset_metadata;
     let offset_tiers = &mut ctx.accounts.offset_tiers;
     let metadata = &mut ctx.accounts.metadata;

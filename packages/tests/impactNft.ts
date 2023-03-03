@@ -10,7 +10,6 @@ import {
   Keypair,
   LAMPORTS_PER_SOL,
   PublicKey,
-  Transaction,
   SystemProgram,
 } from "@solana/web3.js";
 import { getTestMetadata } from "./util";
@@ -54,15 +53,11 @@ describe("impact-nft", () => {
   });
 
   let stateAddress: PublicKey;
-  let offsetTiersAddress: PublicKey;
-  let masterEditionMint: Keypair;
-  let metadataAddress: PublicKey;
-  let masterEditionAddress: PublicKey;
-  let offsetMetadataAddress: PublicKey;
-  let userAssociatedTokenAccount: PublicKey;
 
   const initialOffset = new BN(140); // should still default to a level0 nft
   const updatedOffset = new BN(180); // should upgrade to a level1 nft
+
+  const mint = Keypair.generate();
 
   it("Can register a new global state", async () => {
     const levels = 10;
@@ -95,10 +90,10 @@ describe("impact-nft", () => {
     const authKey = authority.publicKey;
     const levels = [level1, level2, level3];
 
-    await ImpactNftClient.registerOffsetTiers(authKey, levels);
+    await client.registerOffsetTiers(authKey, levels);
 
-    const offsetTiersAddress = await ImpactNftClient.getOffsetTiersAddress(
-      authKey
+    const offsetTiersAddress = client.getOffsetTiersAddress(
+      client.stateAddress
     );
 
     let tiers = await program.account.offsetTiers.fetch(offsetTiersAddress);
@@ -111,31 +106,26 @@ describe("impact-nft", () => {
     assert((tiers.levels[1].uri as string) == level2.uri);
     assert((tiers.levels[2].uri as string) == level3.uri);
   });
+
   it("can mint an nft and update its offset", async () => {
     const {
       PROGRAM_ID,
-      globalState,
       TOKEN_METADATA_PROGRAM_ID,
-      mint,
       metadata,
       userTokenAccount,
       masterEdition,
       offsetMetadata,
       offsetTiers,
-    } = await ImpactNftClient.getMintNftAccounts(
-      authority.publicKey,
-      authority.publicKey
-    );
+    } = client.getMintNftAccounts(mint.publicKey, authority.publicKey);
 
-    let offset = new BN(10);
     let name = "sunrise";
     let symbol = "sun";
 
     await client.program.methods
-      .mintNft(offset, name, symbol)
+      .mintNft(initialOffset, name, symbol)
       .accounts({
         payer: authority.publicKey,
-        mintAuthority: authority.publicKey,
+        authority: authority.publicKey,
         mint: mint.publicKey,
         tokenProgram: TOKEN_PROGRAM_ID,
         metadata,
@@ -146,7 +136,7 @@ describe("impact-nft", () => {
         systemProgram: SystemProgram.programId,
         rent: anchor.web3.SYSVAR_RENT_PUBKEY,
         masterEdition,
-        globalState,
+        globalState: client.stateAddress,
         offsetTiers,
         offsetMetadata,
       })
@@ -162,32 +152,35 @@ describe("impact-nft", () => {
     const offsetMetadataAccount = await program.account.offsetMetadata.fetch(
       offsetMetadata
     );
-    assert(offsetMetadataAccount.offset.eq(new BN(10)));
+    assert(offsetMetadataAccount.offset.eq(initialOffset));
   });
 
-  /*
   it("can update an nft", async () => {
+    let accounts = client.getMintNftAccounts(
+      mint.publicKey,
+      authority.publicKey
+    );
+
     await program.methods
       .updateNft(updatedOffset)
       .accounts({
-        mintAuthority: authority.publicKey,
-        mint: masterEditionMint.publicKey,
+        authority: authority.publicKey,
+        mint: mint.publicKey,
         tokenProgram: spl.TOKEN_PROGRAM_ID,
-        metadata: metadataAddress,
-        tokenAccount: userAssociatedTokenAccount,
-        globalState: stateAddress,
-        offsetTiers: offsetTiersAddress,
-        offsetMetadata: offsetMetadataAddress,
+        metadata: accounts.metadata,
+        tokenAccount: accounts.userTokenAccount,
+        globalState: client.stateAddress,
+        offsetTiers: accounts.offsetTiers,
+        offsetMetadata: accounts.offsetMetadata,
       })
       .signers([authority])
       .rpc();
 
     let offsetMetadata = await program.account.offsetMetadata.fetch(
-      offsetMetadataAddress
+      accounts.offsetMetadata
     );
     assert(offsetMetadata.offset.eq(updatedOffset));
 
     // TODO: Find a way to validate that the mpl metadata is indeed updated
   });
-  */
 });
