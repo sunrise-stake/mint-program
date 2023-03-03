@@ -49,10 +49,8 @@ pub mod impact_nft {
     pub fn mint_nft(
         ctx: Context<MintNft>,
         offset_amount: u64,
-        name: String,
-        symbol: String,
     ) -> Result<()> {
-        mint_nft_handler(ctx, offset_amount, name, symbol)
+        mint_nft_handler(ctx, offset_amount)
     }
 
     pub fn update_nft(ctx: Context<UpdateNft>, offset_amount: u64) -> Result<()> {

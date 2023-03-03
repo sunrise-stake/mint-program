@@ -31,15 +31,12 @@ pub struct UpdateNft<'info> {
         mut,
         seeds = [OFFSET_METADATA_SEED, mint.key().as_ref()],
         bump,
-        has_one = authority @ ErrorCode::InvalidUpdateAuthority,
     )]
     pub offset_metadata: Account<'info, OffsetMetadata>,
 }
 
 /** TODO: review edge cases */
 pub fn update_nft_handler(ctx: Context<UpdateNft>, offset_amount: u64) -> Result<()> {
-    let mint = &ctx.accounts.mint;
-    let mint_authority = &ctx.accounts.authority;
     let offset_metadata = &mut ctx.accounts.offset_metadata;
     let offset_tiers = &mut ctx.accounts.offset_tiers;
     let metadata = &mut ctx.accounts.metadata;
@@ -51,8 +48,6 @@ pub fn update_nft_handler(ctx: Context<UpdateNft>, offset_amount: u64) -> Result
 
     if **ctx.accounts.mint.to_account_info().try_borrow_lamports()? > 0 {
         offset_metadata.set(
-            mint_authority.key(),
-            mint.key(),
             offset_amount,
             *ctx.bumps.get("offset_metadata").unwrap(),
         );

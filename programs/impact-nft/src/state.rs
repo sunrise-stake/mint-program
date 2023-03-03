@@ -30,33 +30,34 @@ impl GlobalState {
 pub struct Level {
     pub offset: u64, // 8
     pub uri: String, // 200
+    pub name: String, // 30
+    pub symbol: String, // 10
+}
+//TODO: need a way to enforce that neither name nor symbol exceeds their bounds
+
+impl Level {
+    pub const SPACE: usize = 8 + 200 + 30 + 15; 
 }
 
 #[account]
 pub struct OffsetTiers {
-    pub authority: Pubkey,
     pub levels: Vec<Level>,
     pub bump: u8,
 }
 
 #[derive(AnchorSerialize, AnchorDeserialize)]
 pub struct OffsetTiersInput {
-    pub authority: Pubkey,
     pub levels: Vec<Level>,
 }
 
 impl OffsetTiers {
     /** Allocate up to 10 levels (can be modified) */
-    pub const SPACE: usize = 8
-        + 32            // authority
-        + 4             // vec
-        + 4             // string
-        + (208 * 10)    // 10 levels
-        + 1             // bump
-        + 8; // discriminator
+    pub const SPACE: usize = 
+        (Level::SPACE * 10)    // 10 levels
+        + 1                    // bump
+        + 8;                   // discriminator
 
     pub fn set(&mut self, input: OffsetTiersInput) {
-        self.authority = input.authority;
         self.levels = input.levels;
     }
 
@@ -76,18 +77,14 @@ impl OffsetTiers {
 
 #[account]
 pub struct OffsetMetadata {
-    pub authority: Pubkey,
-    pub mint: Pubkey,
     pub offset: u64,
     pub bump: u8,
 }
 
 impl OffsetMetadata {
-    pub const SPACE: usize = 8 + 32 + 32 + 8 + 1;
+    pub const SPACE: usize = 8 + 8 + 1;
 
-    pub fn set(&mut self, authority: Pubkey, mint: Pubkey, offset: u64, bump: u8) {
-        self.authority = authority;
-        self.mint = mint;
+    pub fn set(&mut self, offset: u64, bump: u8) {
         self.offset = offset;
         self.bump = bump;
     }

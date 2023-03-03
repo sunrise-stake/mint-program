@@ -207,14 +207,6 @@ export type ImpactNft = {
         {
           "name": "offsetAmount",
           "type": "u64"
-        },
-        {
-          "name": "name",
-          "type": "string"
-        },
-        {
-          "name": "symbol",
-          "type": "string"
         }
       ]
     },
@@ -293,10 +285,6 @@ export type ImpactNft = {
         "kind": "struct",
         "fields": [
           {
-            "name": "authority",
-            "type": "publicKey"
-          },
-          {
             "name": "levels",
             "type": {
               "vec": {
@@ -316,14 +304,6 @@ export type ImpactNft = {
       "type": {
         "kind": "struct",
         "fields": [
-          {
-            "name": "authority",
-            "type": "publicKey"
-          },
-          {
-            "name": "mint",
-            "type": "publicKey"
-          },
           {
             "name": "offset",
             "type": "u64"
@@ -368,6 +348,14 @@ export type ImpactNft = {
           {
             "name": "uri",
             "type": "string"
+          },
+          {
+            "name": "name",
+            "type": "string"
+          },
+          {
+            "name": "symbol",
+            "type": "string"
           }
         ]
       }
@@ -377,10 +365,6 @@ export type ImpactNft = {
       "type": {
         "kind": "struct",
         "fields": [
-          {
-            "name": "authority",
-            "type": "publicKey"
-          },
           {
             "name": "levels",
             "type": {
@@ -626,14 +610,6 @@ export const IDL: ImpactNft = {
         {
           "name": "offsetAmount",
           "type": "u64"
-        },
-        {
-          "name": "name",
-          "type": "string"
-        },
-        {
-          "name": "symbol",
-          "type": "string"
         }
       ]
     },
@@ -712,10 +688,6 @@ export const IDL: ImpactNft = {
         "kind": "struct",
         "fields": [
           {
-            "name": "authority",
-            "type": "publicKey"
-          },
-          {
             "name": "levels",
             "type": {
               "vec": {
@@ -735,14 +707,6 @@ export const IDL: ImpactNft = {
       "type": {
         "kind": "struct",
         "fields": [
-          {
-            "name": "authority",
-            "type": "publicKey"
-          },
-          {
-            "name": "mint",
-            "type": "publicKey"
-          },
           {
             "name": "offset",
             "type": "u64"
@@ -787,6 +751,14 @@ export const IDL: ImpactNft = {
           {
             "name": "uri",
             "type": "string"
+          },
+          {
+            "name": "name",
+            "type": "string"
+          },
+          {
+            "name": "symbol",
+            "type": "string"
           }
         ]
       }
@@ -796,10 +768,6 @@ export const IDL: ImpactNft = {
       "type": {
         "kind": "struct",
         "fields": [
-          {
-            "name": "authority",
-            "type": "publicKey"
-          },
           {
             "name": "levels",
             "type": {
