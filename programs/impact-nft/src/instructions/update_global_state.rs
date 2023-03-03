@@ -5,7 +5,6 @@ use anchor_lang::prelude::*;
 #[derive(Accounts, Clone)]
 #[instruction(state: GlobalStateInput)]
 pub struct UpdateGlobalState<'info> {
-    #[account(mut)]
     pub authority: Signer<'info>,
     #[account(
         mut,

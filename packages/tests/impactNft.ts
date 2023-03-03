@@ -87,10 +87,9 @@ describe("impact-nft", () => {
       offset: new BN(300), // tier 2 limit
       uri: meta[2],
     };
-    const authKey = authority.publicKey;
-    const levels = [level1, level2, level3];
 
-    await client.registerOffsetTiers(authKey, levels);
+    const levels = [level1, level2, level3];
+    await client.registerOffsetTiers(authority.publicKey, levels);
 
     const offsetTiersAddress = client.getOffsetTiersAddress(
       client.stateAddress

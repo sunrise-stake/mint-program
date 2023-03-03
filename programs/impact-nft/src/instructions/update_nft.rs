@@ -7,7 +7,6 @@ use anchor_spl::token::{Mint, Token, TokenAccount};
 
 #[derive(Accounts)]
 pub struct UpdateNft<'info> {
-    #[account(mut)]
     pub authority: Signer<'info>,
     #[account(mut)]
     pub mint: Account<'info, Mint>,
