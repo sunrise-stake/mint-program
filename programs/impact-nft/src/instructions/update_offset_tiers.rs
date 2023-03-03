@@ -1,5 +1,5 @@
 use crate::error::ErrorCode;
-use crate::seeds::{GLOBAL_STATE_SEED, OFFSET_TIERS_SEED};
+use crate::seeds::OFFSET_TIERS_SEED;
 use crate::state::{GlobalState, OffsetTiers, OffsetTiersInput};
 use anchor_lang::prelude::*;
 
@@ -10,15 +10,13 @@ pub struct UpdateOffsetTiers<'info> {
     pub authority: Signer<'info>,
     #[account(
         mut,
-        seeds = [GLOBAL_STATE_SEED, state.authority.as_ref()],
-        bump = global_state.bump,
+        has_one = authority @ ErrorCode::InvalidUpdateAuthority,
     )]
     pub global_state: Account<'info, GlobalState>,
     #[account(
         mut,
-        seeds = [OFFSET_TIERS_SEED, state.authority.as_ref()],
+        seeds = [OFFSET_TIERS_SEED, global_state.key().as_ref()],
         bump,
-        constraint = offset_tiers.authority == *authority.key @ ErrorCode::InvalidUpdateAuthority,
     )]
     pub offset_tiers: Account<'info, OffsetTiers>,
 }

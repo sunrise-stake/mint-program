@@ -1,5 +1,4 @@
 use crate::error::ErrorCode;
-use crate::seeds::GLOBAL_STATE_SEED;
 use crate::state::{GlobalState, GlobalStateInput};
 use anchor_lang::prelude::*;
 
@@ -9,8 +8,7 @@ pub struct UpdateGlobalState<'info> {
     #[account(mut)]
     pub authority: Signer<'info>,
     #[account(
-        seeds = [GLOBAL_STATE_SEED, global_state.authority.as_ref()],
-        bump,
+        mut,
         has_one = authority @ ErrorCode::InvalidUpdateAuthority,
     )]
     pub global_state: Account<'info, GlobalState>,
