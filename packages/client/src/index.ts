@@ -162,9 +162,9 @@ export class ImpactNftClient {
     authority: PublicKey,
     holder: PublicKey
   ): Promise<{
-    PROGRAM_ID: PublicKey;
+    program: PublicKey;
     globalState: PublicKey;
-    TOKEN_METADATA_PROGRAM_ID: PublicKey;
+    tokenMetadataProgram: PublicKey;
     mint: Keypair;
     metadata: PublicKey;
     userTokenAccount: PublicKey;
@@ -188,9 +188,9 @@ export class ImpactNftClient {
     );
 
     return {
-      PROGRAM_ID,
+      program: PROGRAM_ID,
       globalState,
-      TOKEN_METADATA_PROGRAM_ID,
+      tokenMetadataProgram: TOKEN_METADATA_PROGRAM_ID,
       mint,
       metadata,
       userTokenAccount,

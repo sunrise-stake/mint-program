@@ -2,7 +2,7 @@
   "name": "@sunrisestake/impact-nft-client",
   "version": "0.0.1-alpha.0",
   "license": "MIT",
-  "main": "dist/index.ts",
+  "main": "dist/index.js",
   "module": "dist/index.js",
   "types": "dist/index.d.ts",
   "scripts": {
