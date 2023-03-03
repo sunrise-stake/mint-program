@@ -52,10 +52,10 @@ pub struct OffsetTiersInput {
 
 impl OffsetTiers {
     /** Allocate up to 10 levels (can be modified) */
-    pub const SPACE: usize = 
-        (Level::SPACE * 10)    // 10 levels
-        + 1                    // bump
-        + 8;                   // discriminator
+    pub const SPACE: usize = 4   // vec
+        + (Level::SPACE * 10)    // 10 levels
+        + 1                      // bump
+        + 8;                     // discriminator
 
     pub fn set(&mut self, input: OffsetTiersInput) {
         self.levels = input.levels;
