@@ -1,7 +1,7 @@
 import { AnchorProvider, Program } from "@coral-xyz/anchor";
 import * as anchor from "@coral-xyz/anchor";
 import { PublicKey, Keypair, SystemProgram, Connection } from "@solana/web3.js";
-import { ImpactNft, IDL } from "../types/impact_nft";
+import { ImpactNft, IDL } from "./types/impact_nft";
 import { getAssociatedTokenAddressSync } from "@solana/spl-token";
 
 const TOKEN_METADATA_PROGRAM_ID = new PublicKey(
@@ -103,15 +103,15 @@ export class ImpactNftClient {
   }
 
   public static async register(
-    authority: PublicKey,
     levels: number
   ): Promise<ImpactNftClient> {
-    const state = this.getGlobalStateAddress(authority);
-
     const client = new ImpactNftClient(setUpAnchor());
 
+    const authority = client.provider.publicKey;
+    const state = this.getGlobalStateAddress(authority);
+
     const accounts = {
-      authority: client.provider.publicKey,
+      authority: authority,
       globalState: state,
       systemProgram: SystemProgram.programId,
     };

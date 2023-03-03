@@ -1,11 +1,11 @@
 import * as anchor from "@coral-xyz/anchor";
 import * as spl from "@solana/spl-token";
 import { Program } from "@coral-xyz/anchor";
-import { ImpactNft } from "../types/impact_nft";
+import { ImpactNft } from "../client/src/types/impact_nft";
 import { expect } from "chai";
 import testAuthority from "./fixtures/id.json";
 import BN from "bn.js";
-import { ImpactNftClient, confirm } from "../client";
+import { ImpactNftClient, confirm } from "../client/src";
 import {
   Keypair,
   LAMPORTS_PER_SOL,
