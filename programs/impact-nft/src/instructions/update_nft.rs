@@ -7,7 +7,7 @@ use anchor_spl::token::{Mint, Token, TokenAccount};
 
 #[derive(Accounts)]
 pub struct UpdateNft<'info> {
-    pub authority: Signer<'info>,
+    pub mint_authority: Signer<'info>,
     #[account(mut)]
     pub mint: Account<'info, Mint>,
     pub token_program: Program<'info, Token>,
@@ -18,7 +18,7 @@ pub struct UpdateNft<'info> {
     pub token_account: Account<'info, TokenAccount>,
     #[account(
         mut,
-        has_one = authority @ ErrorCode::InvalidUpdateAuthority,
+        has_one = mint_authority @ ErrorCode::InvalidMintAuthority,
     )]
     pub global_state: Account<'info, GlobalState>,
     #[account(
@@ -47,10 +47,7 @@ pub fn update_nft_handler(ctx: Context<UpdateNft>, offset_amount: u64) -> Result
     }
 
     if **ctx.accounts.mint.to_account_info().try_borrow_lamports()? > 0 {
-        offset_metadata.set(
-            offset_amount,
-            *ctx.bumps.get("offset_metadata").unwrap(),
-        );
+        offset_metadata.set(offset_amount, *ctx.bumps.get("offset_metadata").unwrap());
         set_metadata_uri(offset_tiers, &metadata.to_account_info(), offset_amount)?;
     } else {
         return Err(ErrorCode::InvalidUpdateForMint.into());

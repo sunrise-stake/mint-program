@@ -2,23 +2,30 @@ use anchor_lang::prelude::*;
 
 #[account]
 pub struct GlobalState {
-    pub authority: Pubkey,
-    // number of levels, can probably be capped at u8 or u16 
+    pub admin_authority: Pubkey, // Typically an EOA
+    pub mint_authority: Pubkey,  // Typically a PDA
+    // number of levels, can probably be capped at u8 or u16
     pub levels: u16,
-    
 }
 
 #[derive(AnchorSerialize, AnchorDeserialize, Clone)]
-pub struct GlobalStateInput {
-    pub authority: Pubkey,
+pub struct GlobalStateCreateInput {
+    pub mint_authority: Pubkey,
+    pub levels: u16,
+}
+#[derive(AnchorSerialize, AnchorDeserialize, Clone)]
+pub struct GlobalStateUpdateInput {
+    pub admin_authority: Pubkey,
+    pub mint_authority: Pubkey,
     pub levels: u16,
 }
 
 impl GlobalState {
-    pub const SPACE: usize = 8 + 32 + 2;
+    pub const SPACE: usize = 8 + 32 + 32 + 2;
 
-    pub fn set(&mut self, authority: Pubkey, levels: u16) {
-        self.authority = authority;
+    pub fn set(&mut self, admin_authority: Pubkey, mint_authority: Pubkey, levels: u16) {
+        self.admin_authority = admin_authority;
+        self.mint_authority = mint_authority;
         self.levels = levels;
     }
 }
@@ -28,15 +35,15 @@ impl GlobalState {
  */
 #[derive(AnchorSerialize, AnchorDeserialize, Clone)]
 pub struct Level {
-    pub offset: u64, // 8
-    pub uri: String, // 200
-    pub name: String, // 30
+    pub offset: u64,    // 8
+    pub uri: String,    // 200
+    pub name: String,   // 30
     pub symbol: String, // 10
 }
 //TODO: need a way to enforce that neither name nor symbol exceeds their bounds
 
 impl Level {
-    pub const SPACE: usize = 8 + 200 + 30 + 15; 
+    pub const SPACE: usize = 8 + 200 + 30 + 15;
 }
 
 #[account]
@@ -55,7 +62,7 @@ impl OffsetTiers {
     pub const SPACE: usize = 4   // vec
         + (Level::SPACE * 10)    // 10 levels
         + 1                      // bump
-        + 8;                     // discriminator
+        + 8; // discriminator
 
     pub fn set(&mut self, input: OffsetTiersInput) {
         self.levels = input.levels;

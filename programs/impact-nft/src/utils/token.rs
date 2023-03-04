@@ -43,10 +43,11 @@ pub fn mint_to<'a>(
     mint_authority: &AccountInfo<'a>,
     token_account: &AccountInfo<'a>,
 ) -> Result<()> {
-    anchor_spl::token::mint_to(
+    msg!("Minting nft");
+    token::mint_to(
         CpiContext::new(
             token_program.to_account_info(),
-            anchor_spl::token::MintTo {
+            token::MintTo {
                 mint: mint.to_account_info(),
                 to: token_account.to_account_info(),
                 authority: mint_authority.to_account_info(),

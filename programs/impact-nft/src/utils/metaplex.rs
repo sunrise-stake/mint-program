@@ -47,7 +47,7 @@ pub fn create_metadata_account<'a>(
             mint.key(),
             mint_authority.key(),
             payer.key(),
-            payer.key(),
+            mint_authority.key(),
             level.name.clone(),
             level.symbol.clone(),
             level.uri.clone(),
@@ -77,6 +77,7 @@ pub fn create_master_edition_account<'a>(
     rent: &AccountInfo<'a>,
 ) -> Result<()> {
     let accounts = vec![
+        update_authority.clone(),
         master_edition.clone(),
         mint.clone(),
         mint_authority.clone(),

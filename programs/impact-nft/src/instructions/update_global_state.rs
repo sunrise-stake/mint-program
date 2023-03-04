@@ -1,25 +1,25 @@
 use crate::error::ErrorCode;
-use crate::state::{GlobalState, GlobalStateInput};
+use crate::state::{GlobalState, GlobalStateUpdateInput};
 use anchor_lang::prelude::*;
 
 #[derive(Accounts, Clone)]
-#[instruction(state: GlobalStateInput)]
+#[instruction(state: GlobalStateUpdateInput)]
 pub struct UpdateGlobalState<'info> {
-    pub authority: Signer<'info>,
+    pub admin_authority: Signer<'info>,
     #[account(
         mut,
-        has_one = authority @ ErrorCode::InvalidUpdateAuthority,
+        has_one = admin_authority @ ErrorCode::InvalidAdminAuthority,
     )]
     pub global_state: Account<'info, GlobalState>,
-    pub system_program: Program<'info, System>,
 }
 
 pub fn update_global_state_handler(
     ctx: Context<UpdateGlobalState>,
-    state: GlobalStateInput,
+    state: GlobalStateUpdateInput,
 ) -> Result<()> {
     let global_state = &mut ctx.accounts.global_state;
-    global_state.authority = state.authority.key();
+    global_state.admin_authority = state.admin_authority.key();
+    global_state.mint_authority = state.mint_authority.key();
     global_state.levels = state.levels;
     Ok(())
 }

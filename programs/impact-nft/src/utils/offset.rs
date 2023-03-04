@@ -17,10 +17,7 @@ pub fn set_offset_metadata<'a>(
 
     /* set offset metadata */
     let mut owned_offset_metadata = Account::<'a, OffsetMetadata>::try_from(offset_metadata)?;
-    owned_offset_metadata.set(
-        offset_amount,
-        offset_metadata_bump,
-    );
+    owned_offset_metadata.set(offset_amount, offset_metadata_bump);
 
     // Serialize changes back into account, skipping the space allocated to discriminator
     owned_offset_metadata.serialize(&mut &mut offset_metadata.data.borrow_mut()[8..])?;
