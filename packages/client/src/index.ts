@@ -15,6 +15,8 @@ export const PROGRAM_ID = new PublicKey(
 interface Level {
   offset: anchor.BN;
   uri: string;
+  name: string;
+  symbol: string;
 }
 
 export const confirm = (connection: Connection) => async (txSig: string) =>
