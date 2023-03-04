@@ -7,9 +7,7 @@ use mpl_token_metadata::state::{Metadata, TokenMetadataAccount};
 use crate::Level;
 
 pub fn create_metadata_account<'a>(
-    name: String,
-    symbol: String,
-    uri: String,
+    level: &Level,
     metadata_account: &AccountInfo<'a>,
     mint: &AccountInfo<'a>,
     mint_authority: &AccountInfo<'a>,
@@ -50,9 +48,9 @@ pub fn create_metadata_account<'a>(
             mint_authority.key(),
             payer.key(),
             payer.key(),
-            name,
-            symbol,
-            uri,
+            level.name.clone(),
+            level.symbol.clone(),
+            level.uri.clone(),
             Some(creator),
             1,
             true,
@@ -110,14 +108,11 @@ pub fn set_metadata_uri<'a>(
     metadata: &AccountInfo<'a>,
     offset_amount: u64,
 ) -> Result<()> {
-    let default_level = Level {
-        offset: offset_tiers.levels[0].offset,
-        uri: offset_tiers.levels[0].uri.clone(),
-    };
+    let default_level = &offset_tiers.levels[0];
 
     let level = offset_tiers
         .get_level(offset_amount)
-        .unwrap_or(&default_level);
+        .unwrap_or(default_level);
 
     let mut metadata: Metadata =
         TokenMetadataAccount::from_account_info(&metadata.to_account_info())?;

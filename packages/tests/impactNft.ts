@@ -78,19 +78,24 @@ describe("impact-nft", () => {
     const level1 = {
       offset: new BN(100), // tier 0 limit
       uri: meta[0],
+      name: "sunriseStake0",
+      symbol: "sun0",
     };
     const level2 = {
       offset: new BN(200), // tier 1 limit
       uri: meta[1],
+      name: "sunriseStake1",
+      symbol: "sun1",
     };
     const level3 = {
       offset: new BN(300), // tier 2 limit
       uri: meta[2],
+      name: "sunriseStake2",
+      symbol: "sun2",
     };
-    const authKey = authority.publicKey;
-    const levels = [level1, level2, level3];
 
-    await client.registerOffsetTiers(authKey, levels);
+    const levels = [level1, level2, level3];
+    await client.registerOffsetTiers(authority.publicKey, levels);
 
     const offsetTiersAddress = client.getOffsetTiersAddress(
       client.stateAddress
@@ -118,11 +123,8 @@ describe("impact-nft", () => {
       offsetTiers,
     } = client.getMintNftAccounts(mint.publicKey, authority.publicKey);
 
-    let name = "sunrise";
-    let symbol = "sun";
-
     await client.program.methods
-      .mintNft(initialOffset, name, symbol)
+      .mintNft(initialOffset)
       .accounts({
         payer: authority.publicKey,
         authority: authority.publicKey,

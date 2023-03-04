@@ -15,7 +15,6 @@ use anchor_spl::token::Token;
 pub struct MintNft<'info> {
     #[account(mut)]
     pub payer: Signer<'info>,
-    #[account(mut)]
     pub authority: Signer<'info>,
     /// CHECK: Initialized as mint in instruction
     #[account(mut)]
@@ -62,8 +61,6 @@ pub struct MintNft<'info> {
 pub fn mint_nft_handler(
     ctx: Context<MintNft>,
     offset_amount: u64,
-    name: String,
-    symbol: String,
 ) -> Result<()> {
     let mint = &ctx.accounts.mint;
     let mint_authority = &ctx.accounts.authority;
@@ -110,9 +107,7 @@ pub fn mint_nft_handler(
 
     msg!("creating metadata account");
     create_metadata_account(
-        name,
-        symbol,
-        offset_tiers.levels[0].uri.to_string(),
+        &offset_tiers.levels[0],
         &metadata.to_account_info(),
         &mint.to_account_info(),
         &mint_authority.to_account_info(),
@@ -150,8 +145,6 @@ pub fn mint_nft_handler(
 
     msg!("setting offset metadata");
     set_offset_metadata(
-        &mint.to_account_info(),
-        &mint_authority.to_account_info(),
         offset_metadata,
         offset_amount,
         *ctx.bumps.get("offset_metadata").unwrap(),
