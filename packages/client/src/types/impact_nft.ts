@@ -11,6 +11,11 @@ export type ImpactNft = {
           "isSigner": true
         },
         {
+          "name": "adminAuthority",
+          "isMut": false,
+          "isSigner": true
+        },
+        {
           "name": "globalState",
           "isMut": true,
           "isSigner": true
@@ -25,7 +30,7 @@ export type ImpactNft = {
         {
           "name": "input",
           "type": {
-            "defined": "GlobalStateInput"
+            "defined": "GlobalStateCreateInput"
           }
         }
       ]
@@ -34,7 +39,7 @@ export type ImpactNft = {
       "name": "updateGlobalState",
       "accounts": [
         {
-          "name": "authority",
+          "name": "adminAuthority",
           "isMut": false,
           "isSigner": true
         },
@@ -42,18 +47,13 @@ export type ImpactNft = {
           "name": "globalState",
           "isMut": true,
           "isSigner": false
-        },
-        {
-          "name": "systemProgram",
-          "isMut": false,
-          "isSigner": false
         }
       ],
       "args": [
         {
           "name": "input",
           "type": {
-            "defined": "GlobalStateInput"
+            "defined": "GlobalStateUpdateInput"
           }
         }
       ]
@@ -62,7 +62,7 @@ export type ImpactNft = {
       "name": "createOffsetTiers",
       "accounts": [
         {
-          "name": "authority",
+          "name": "adminAuthority",
           "isMut": false,
           "isSigner": true
         },
@@ -100,7 +100,7 @@ export type ImpactNft = {
       "name": "updateOffsetTiers",
       "accounts": [
         {
-          "name": "authority",
+          "name": "adminAuthority",
           "isMut": false,
           "isSigner": true
         },
@@ -133,7 +133,7 @@ export type ImpactNft = {
           "isSigner": true
         },
         {
-          "name": "authority",
+          "name": "mintAuthority",
           "isMut": false,
           "isSigner": true
         },
@@ -214,7 +214,7 @@ export type ImpactNft = {
       "name": "updateNft",
       "accounts": [
         {
-          "name": "authority",
+          "name": "mintAuthority",
           "isMut": false,
           "isSigner": true
         },
@@ -269,7 +269,11 @@ export type ImpactNft = {
         "kind": "struct",
         "fields": [
           {
-            "name": "authority",
+            "name": "adminAuthority",
+            "type": "publicKey"
+          },
+          {
+            "name": "mintAuthority",
             "type": "publicKey"
           },
           {
@@ -318,12 +322,32 @@ export type ImpactNft = {
   ],
   "types": [
     {
-      "name": "GlobalStateInput",
+      "name": "GlobalStateCreateInput",
       "type": {
         "kind": "struct",
         "fields": [
           {
-            "name": "authority",
+            "name": "mintAuthority",
+            "type": "publicKey"
+          },
+          {
+            "name": "levels",
+            "type": "u16"
+          }
+        ]
+      }
+    },
+    {
+      "name": "GlobalStateUpdateInput",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "adminAuthority",
+            "type": "publicKey"
+          },
+          {
+            "name": "mintAuthority",
             "type": "publicKey"
           },
           {
@@ -380,21 +404,26 @@ export type ImpactNft = {
   "errors": [
     {
       "code": 6000,
-      "name": "InvalidUpdateAuthority",
-      "msg": "Wrong update authority for offset state"
+      "name": "InvalidAdminAuthority",
+      "msg": "Wrong admin authority for offset state"
     },
     {
       "code": 6001,
+      "name": "InvalidMintAuthority",
+      "msg": "Wrong mint authority for offset state"
+    },
+    {
+      "code": 6002,
       "name": "InvalidOffsetMetadata",
       "msg": "Invalid offset metadata pda"
     },
     {
-      "code": 6002,
+      "code": 6003,
       "name": "NoOffsetTiers",
       "msg": "Invalid offset tiers pda"
     },
     {
-      "code": 6003,
+      "code": 6004,
       "name": "InvalidUpdateForMint",
       "msg": "Invalid update for mint"
     }
@@ -414,6 +443,11 @@ export const IDL: ImpactNft = {
           "isSigner": true
         },
         {
+          "name": "adminAuthority",
+          "isMut": false,
+          "isSigner": true
+        },
+        {
           "name": "globalState",
           "isMut": true,
           "isSigner": true
@@ -428,7 +462,7 @@ export const IDL: ImpactNft = {
         {
           "name": "input",
           "type": {
-            "defined": "GlobalStateInput"
+            "defined": "GlobalStateCreateInput"
           }
         }
       ]
@@ -437,7 +471,7 @@ export const IDL: ImpactNft = {
       "name": "updateGlobalState",
       "accounts": [
         {
-          "name": "authority",
+          "name": "adminAuthority",
           "isMut": false,
           "isSigner": true
         },
@@ -445,18 +479,13 @@ export const IDL: ImpactNft = {
           "name": "globalState",
           "isMut": true,
           "isSigner": false
-        },
-        {
-          "name": "systemProgram",
-          "isMut": false,
-          "isSigner": false
         }
       ],
       "args": [
         {
           "name": "input",
           "type": {
-            "defined": "GlobalStateInput"
+            "defined": "GlobalStateUpdateInput"
           }
         }
       ]
@@ -465,7 +494,7 @@ export const IDL: ImpactNft = {
       "name": "createOffsetTiers",
       "accounts": [
         {
-          "name": "authority",
+          "name": "adminAuthority",
           "isMut": false,
           "isSigner": true
         },
@@ -503,7 +532,7 @@ export const IDL: ImpactNft = {
       "name": "updateOffsetTiers",
       "accounts": [
         {
-          "name": "authority",
+          "name": "adminAuthority",
           "isMut": false,
           "isSigner": true
         },
@@ -536,7 +565,7 @@ export const IDL: ImpactNft = {
           "isSigner": true
         },
         {
-          "name": "authority",
+          "name": "mintAuthority",
           "isMut": false,
           "isSigner": true
         },
@@ -617,7 +646,7 @@ export const IDL: ImpactNft = {
       "name": "updateNft",
       "accounts": [
         {
-          "name": "authority",
+          "name": "mintAuthority",
           "isMut": false,
           "isSigner": true
         },
@@ -672,7 +701,11 @@ export const IDL: ImpactNft = {
         "kind": "struct",
         "fields": [
           {
-            "name": "authority",
+            "name": "adminAuthority",
+            "type": "publicKey"
+          },
+          {
+            "name": "mintAuthority",
             "type": "publicKey"
           },
           {
@@ -721,12 +754,32 @@ export const IDL: ImpactNft = {
   ],
   "types": [
     {
-      "name": "GlobalStateInput",
+      "name": "GlobalStateCreateInput",
       "type": {
         "kind": "struct",
         "fields": [
           {
-            "name": "authority",
+            "name": "mintAuthority",
+            "type": "publicKey"
+          },
+          {
+            "name": "levels",
+            "type": "u16"
+          }
+        ]
+      }
+    },
+    {
+      "name": "GlobalStateUpdateInput",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "adminAuthority",
+            "type": "publicKey"
+          },
+          {
+            "name": "mintAuthority",
             "type": "publicKey"
           },
           {
@@ -783,21 +836,26 @@ export const IDL: ImpactNft = {
   "errors": [
     {
       "code": 6000,
-      "name": "InvalidUpdateAuthority",
-      "msg": "Wrong update authority for offset state"
+      "name": "InvalidAdminAuthority",
+      "msg": "Wrong admin authority for offset state"
     },
     {
       "code": 6001,
+      "name": "InvalidMintAuthority",
+      "msg": "Wrong mint authority for offset state"
+    },
+    {
+      "code": 6002,
       "name": "InvalidOffsetMetadata",
       "msg": "Invalid offset metadata pda"
     },
     {
-      "code": 6002,
+      "code": 6003,
       "name": "NoOffsetTiers",
       "msg": "Invalid offset tiers pda"
     },
     {
-      "code": 6003,
+      "code": 6004,
       "name": "InvalidUpdateForMint",
       "msg": "Invalid update for mint"
     }

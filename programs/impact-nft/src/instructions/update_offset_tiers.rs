@@ -6,10 +6,10 @@ use anchor_lang::prelude::*;
 #[derive(Accounts, Clone)]
 #[instruction(state: OffsetTiersInput)]
 pub struct UpdateOffsetTiers<'info> {
-    pub authority: Signer<'info>,
+    pub admin_authority: Signer<'info>,
     #[account(
         mut,
-        has_one = authority @ ErrorCode::InvalidUpdateAuthority,
+        has_one = admin_authority @ ErrorCode::InvalidAdminAuthority,
     )]
     pub global_state: Account<'info, GlobalState>,
     #[account(

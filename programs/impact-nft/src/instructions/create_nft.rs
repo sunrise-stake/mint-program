@@ -1,9 +1,7 @@
 use crate::error::ErrorCode;
 use crate::seeds::{OFFSET_METADATA_SEED, OFFSET_TIERS_SEED};
 use crate::state::{GlobalState, OffsetTiers};
-use crate::utils::metaplex::{
-    create_master_edition_account, create_metadata_account,
-};
+use crate::utils::metaplex::{create_master_edition_account, create_metadata_account};
 use crate::utils::offset::set_offset_metadata;
 use crate::utils::system::create_offset_metadata_account;
 use crate::utils::token::{create_mint, create_token_account, mint_to};
@@ -15,11 +13,10 @@ use anchor_spl::token::Token;
 pub struct MintNft<'info> {
     #[account(mut)]
     pub payer: Signer<'info>,
-    pub authority: Signer<'info>,
+    pub mint_authority: Signer<'info>,
     /// CHECK: Initialized as mint in instruction
     #[account(mut)]
     pub mint: Signer<'info>,
-    //pub mint: UncheckedAccount<'info>,
     pub token_program: Program<'info, Token>,
     /// CHECK: Checked in metaplex program
     #[account(mut)]
@@ -39,7 +36,7 @@ pub struct MintNft<'info> {
     pub master_edition: UncheckedAccount<'info>,
     #[account(
         mut,
-        has_one = authority @ ErrorCode::InvalidUpdateAuthority,
+        has_one = mint_authority @ ErrorCode::InvalidMintAuthority,
     )]
     pub global_state: Account<'info, GlobalState>,
     #[account(
@@ -58,12 +55,9 @@ pub struct MintNft<'info> {
 }
 
 /** TODO: add offset update logic */
-pub fn mint_nft_handler(
-    ctx: Context<MintNft>,
-    offset_amount: u64,
-) -> Result<()> {
+pub fn mint_nft_handler(ctx: Context<MintNft>, offset_amount: u64) -> Result<()> {
     let mint = &ctx.accounts.mint;
-    let mint_authority = &ctx.accounts.authority;
+    let mint_authority = &ctx.accounts.mint_authority;
     let payer = &ctx.accounts.payer;
     let system_program = &ctx.accounts.system_program;
     let token_program = &ctx.accounts.token_program;

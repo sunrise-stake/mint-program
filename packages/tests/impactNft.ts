@@ -20,6 +20,9 @@ const program = anchor.workspace.ImpactNft as Program<ImpactNft>;
 const TOKEN_METADATA_PROGRAM_ID = new PublicKey(
   "metaqbxxUerdq28cj1RbAWkYQm3ybzjb6a8bt518x1s"
 );
+// This would typically be a PDA onwed by a different program
+// e.g. the sunrise program
+const mintAuthority = Keypair.generate();
 
 export const expectAmount = (
   actualAmount: number | BN,
@@ -44,11 +47,12 @@ export const expectAmount = (
 
 describe("impact-nft", () => {
   let client: ImpactNftClient;
-  const authority = Keypair.fromSecretKey(Uint8Array.from(testAuthority));
+  let user = Keypair.generate();
 
-  beforeEach(async () => {
+  before(async () => {
+    // fund the mint authority
     await program.provider.connection
-      .requestAirdrop(authority.publicKey, 100 * LAMPORTS_PER_SOL)
+      .requestAirdrop(mintAuthority.publicKey, 100 * LAMPORTS_PER_SOL)
       .then(async (sig) => program.provider.connection.confirmTransaction(sig));
   });
 
@@ -61,14 +65,19 @@ describe("impact-nft", () => {
 
   it("Can register a new global state", async () => {
     const levels = 10;
-    client = await ImpactNftClient.register(authority.publicKey, levels);
+    client = await ImpactNftClient.register(mintAuthority.publicKey, levels);
 
     expect(client.stateAddress).not.to.be.null;
 
     stateAddress = client.stateAddress as PublicKey;
 
     const state = await program.account.globalState.fetch(stateAddress);
-    expect(state.authority.toBase58()).equal(authority.publicKey.toBase58());
+    expect(state.mintAuthority.toBase58()).equal(
+      mintAuthority.publicKey.toBase58()
+    );
+    expect(state.adminAuthority.toBase58()).equal(
+      client.provider.publicKey.toBase58()
+    );
     expect(state.levels).equal(levels);
   });
 
@@ -95,7 +104,7 @@ describe("impact-nft", () => {
     };
 
     const levels = [level1, level2, level3];
-    await client.registerOffsetTiers(authority.publicKey, levels);
+    await client.registerOffsetTiers(levels);
 
     const offsetTiersAddress = client.getOffsetTiersAddress(
       client.stateAddress
@@ -113,69 +122,60 @@ describe("impact-nft", () => {
   });
 
   it("can mint an nft and update its offset", async () => {
-    const {
-      PROGRAM_ID,
-      TOKEN_METADATA_PROGRAM_ID,
-      metadata,
-      userTokenAccount,
-      masterEdition,
-      offsetMetadata,
-      offsetTiers,
-    } = client.getMintNftAccounts(mint.publicKey, authority.publicKey);
+    const mintNftAccounts = client.getMintNftAccounts(
+      mint.publicKey,
+      user.publicKey
+    );
+
+    console.log("mint", mint.publicKey.toBase58());
+    console.log("user", user.publicKey.toBase58());
+    console.log("mintAuthority", mintAuthority.publicKey.toBase58());
+
+    const accounts = {
+      ...mintNftAccounts,
+      payer: client.provider.publicKey,
+      mint: mint.publicKey,
+      tokenProgram: TOKEN_PROGRAM_ID,
+      mintNftToOwner: user.publicKey,
+      mintNftTo: mintNftAccounts.userTokenAccount,
+      associatedTokenProgram: spl.ASSOCIATED_TOKEN_PROGRAM_ID,
+      systemProgram: SystemProgram.programId,
+      rent: anchor.web3.SYSVAR_RENT_PUBKEY,
+      globalState: client.stateAddress,
+    };
+    console.log("accounts", accounts);
 
     await client.program.methods
       .mintNft(initialOffset)
-      .accounts({
-        payer: authority.publicKey,
-        authority: authority.publicKey,
-        mint: mint.publicKey,
-        tokenProgram: TOKEN_PROGRAM_ID,
-        metadata,
-        mintNftToOwner: client.provider.publicKey,
-        mintNftTo: userTokenAccount,
-        associatedTokenProgram: spl.ASSOCIATED_TOKEN_PROGRAM_ID,
-        tokenMetadataProgram: TOKEN_METADATA_PROGRAM_ID,
-        systemProgram: SystemProgram.programId,
-        rent: anchor.web3.SYSVAR_RENT_PUBKEY,
-        masterEdition,
-        globalState: client.stateAddress,
-        offsetTiers,
-        offsetMetadata,
-      })
-      .signers([mint])
+      .accounts(accounts)
+      .signers([mint, mintAuthority])
       .rpc()
       .then(() => confirm(client.provider.connection));
 
     const value = await program.provider.connection
-      .getTokenAccountBalance(userTokenAccount)
+      .getTokenAccountBalance(mintNftAccounts.userTokenAccount)
       .then((res) => res.value);
     assert(Number(value.amount) == 1);
 
     const offsetMetadataAccount = await program.account.offsetMetadata.fetch(
-      offsetMetadata
+      mintNftAccounts.offsetMetadata
     );
     assert(offsetMetadataAccount.offset.eq(initialOffset));
   });
 
   it("can update an nft", async () => {
-    let accounts = client.getMintNftAccounts(
-      mint.publicKey,
-      authority.publicKey
-    );
+    let accounts = client.getMintNftAccounts(mint.publicKey, user.publicKey);
 
     await program.methods
       .updateNft(updatedOffset)
       .accounts({
-        authority: authority.publicKey,
-        mint: mint.publicKey,
-        tokenProgram: spl.TOKEN_PROGRAM_ID,
-        metadata: accounts.metadata,
+        ...accounts,
         tokenAccount: accounts.userTokenAccount,
         globalState: client.stateAddress,
-        offsetTiers: accounts.offsetTiers,
-        offsetMetadata: accounts.offsetMetadata,
+        mint: mint.publicKey,
+        tokenProgram: spl.TOKEN_PROGRAM_ID,
       })
-      .signers([authority])
+      .signers([mintAuthority])
       .rpc();
 
     let offsetMetadata = await program.account.offsetMetadata.fetch(

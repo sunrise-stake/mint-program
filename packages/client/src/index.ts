@@ -34,7 +34,8 @@ export const setUpAnchor = (): anchor.AnchorProvider => {
 };
 
 export interface ImpactNftClientConfig {
-  authority: PublicKey;
+  mintAuthority: PublicKey;
+  adminAuthority: PublicKey;
   levels: number;
 }
 
@@ -48,7 +49,7 @@ export class ImpactNftClient {
   }
 
   public static async register(
-    authority: PublicKey,
+    mintAuthority: PublicKey,
     levels: number
   ): Promise<ImpactNftClient> {
     const client = new ImpactNftClient(setUpAnchor());
@@ -56,13 +57,14 @@ export class ImpactNftClient {
 
     const accounts = {
       payer: client.provider.publicKey,
+      adminAuthority: client.provider.publicKey,
       globalState: state.publicKey,
       systemProgram: SystemProgram.programId,
     };
 
     await client.program.methods
       .createGlobalState({
-        authority,
+        mintAuthority,
         levels,
       })
       .accounts(accounts)
@@ -79,7 +81,8 @@ export class ImpactNftClient {
     const state = await this.program.account.globalState.fetch(stateAddress);
 
     this.config = {
-      authority: state.authority,
+      mintAuthority: state.mintAuthority,
+      adminAuthority: state.adminAuthority,
       levels: state.levels as number,
     };
 
@@ -125,7 +128,7 @@ export class ImpactNftClient {
     )[0];
   }
 
-  public async registerOffsetTiers(authority: PublicKey, levels: Level[]) {
+  public async registerOffsetTiers(levels: Level[]) {
     if (!this.stateAddress) throw new Error("Client not initialized");
 
     // get state account
@@ -135,11 +138,10 @@ export class ImpactNftClient {
 
     await client.program.methods
       .createOffsetTiers({
-        authority,
         levels,
       })
       .accounts({
-        authority: client.provider.publicKey,
+        adminAuthority: client.provider.publicKey,
         globalState: this.stateAddress,
         offsetTiers,
         systemProgram: SystemProgram.programId,
@@ -149,19 +151,20 @@ export class ImpactNftClient {
   }
 
   public getMintNftAccounts(
-      authority: PublicKey,
     mint: PublicKey,
     user: PublicKey
   ): {
     program: PublicKey;
     tokenMetadataProgram: PublicKey;
+    mintAuthority: PublicKey;
     metadata: PublicKey;
     userTokenAccount: PublicKey;
     masterEdition: PublicKey;
     offsetMetadata: PublicKey;
     offsetTiers: PublicKey;
   } {
-    if (!this.stateAddress) throw new Error("Client not initialized");
+    if (!this.stateAddress || !this.config)
+      throw new Error("Client not initialized");
 
     const metadata = this.getMetadataAddress(mint);
     const masterEdition = this.getMasterEditionAddress(mint);
@@ -172,6 +175,7 @@ export class ImpactNftClient {
     return {
       program: PROGRAM_ID,
       tokenMetadataProgram: TOKEN_METADATA_PROGRAM_ID,
+      mintAuthority: this.config.mintAuthority,
       metadata,
       userTokenAccount,
       masterEdition,

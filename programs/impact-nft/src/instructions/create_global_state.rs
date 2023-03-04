@@ -1,11 +1,12 @@
-use crate::state::{GlobalState, GlobalStateInput};
+use crate::state::{GlobalState, GlobalStateCreateInput};
 use anchor_lang::prelude::*;
 
 #[derive(Accounts, Clone)]
-#[instruction(state: GlobalStateInput)]
+#[instruction(state: GlobalStateCreateInput)]
 pub struct CreateGlobalState<'info> {
     #[account(mut)]
     pub payer: Signer<'info>,
+    pub admin_authority: Signer<'info>,
     #[account(
         init,
         payer = payer,
@@ -17,11 +18,12 @@ pub struct CreateGlobalState<'info> {
 
 pub fn create_global_state_handler(
     ctx: Context<CreateGlobalState>,
-    state: GlobalStateInput,
+    state: GlobalStateCreateInput,
 ) -> Result<()> {
     let global_state = &mut ctx.accounts.global_state;
     global_state.set(
-        state.authority,
+        ctx.accounts.admin_authority.key(),
+        state.mint_authority,
         state.levels,
     );
     Ok(())
