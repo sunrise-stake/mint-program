@@ -15,7 +15,7 @@ pub struct MintNft<'info> {
     #[account(mut)]
     pub mint: Signer<'info>,
     pub token_program: Program<'info, Token>,
-    /// CHECK: Checked in metaplex program
+    /// CHECK: Initialized in the metaplex program
     #[account(mut)]
     pub metadata: UncheckedAccount<'info>,
     /// CHECK: The owner of the token account the nft is minted to
