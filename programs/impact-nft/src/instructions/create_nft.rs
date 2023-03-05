@@ -12,7 +12,6 @@ pub struct MintNft<'info> {
     #[account(mut)]
     pub payer: Signer<'info>,
     pub mint_authority: Signer<'info>,
-    /// CHECK: Initialized as mint in instruction
     #[account(mut)]
     pub mint: Signer<'info>,
     pub token_program: Program<'info, Token>,
@@ -21,7 +20,7 @@ pub struct MintNft<'info> {
     pub metadata: UncheckedAccount<'info>,
     /// CHECK: The owner of the token account the nft is minted to
     pub mint_nft_to_owner: UncheckedAccount<'info>,
-    /// CHECK: Initialized in instruction handler
+    /// CHECK: Initialized in instruction handler as token account - TODO move to init here using anchor's spl-token integration?
     #[account(mut)]
     pub mint_nft_to: UncheckedAccount<'info>,
     pub associated_token_program: Program<'info, AssociatedToken>,
@@ -41,7 +40,6 @@ pub struct MintNft<'info> {
         bump,
     )]
     pub offset_tiers: Account<'info, OffsetTiers>,
-    /// CHECK: Created and/or validated in instruction handler
     #[account(
         init,
         seeds = [OFFSET_METADATA_SEED, mint.key().as_ref()],
