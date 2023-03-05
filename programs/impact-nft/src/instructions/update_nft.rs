@@ -45,7 +45,7 @@ pub fn update_nft_handler(ctx: Context<UpdateNft>, offset_amount: u64) -> Result
     }
 
     if **ctx.accounts.mint.to_account_info().try_borrow_lamports()? > 0 {
-        offset_metadata.set(offset_amount, *ctx.bumps.get("offset_metadata").unwrap());
+        offset_metadata.set_amount(offset_amount);
         set_metadata_uri(offset_tiers, &metadata.to_account_info(), offset_amount)?;
     } else {
         return Err(ErrorCode::InvalidUpdateForMint.into());
