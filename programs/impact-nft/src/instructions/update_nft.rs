@@ -17,12 +17,10 @@ pub struct UpdateNft<'info> {
     #[account(mut)]
     pub token_account: Account<'info, TokenAccount>,
     #[account(
-        mut,
         has_one = mint_authority @ ErrorCode::InvalidMintAuthority,
     )]
     pub global_state: Account<'info, GlobalState>,
     #[account(
-        mut,
         seeds = [OFFSET_TIERS_SEED, global_state.key().as_ref()],
         bump,
     )]

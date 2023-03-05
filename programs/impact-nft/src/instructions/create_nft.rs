@@ -35,12 +35,10 @@ pub struct MintNft<'info> {
     #[account(mut)]
     pub master_edition: UncheckedAccount<'info>,
     #[account(
-        mut,
         has_one = mint_authority @ ErrorCode::InvalidMintAuthority,
     )]
     pub global_state: Account<'info, GlobalState>,
     #[account(
-        mut,
         seeds = [OFFSET_TIERS_SEED, global_state.key().as_ref()],
         bump,
     )]
@@ -51,7 +49,7 @@ pub struct MintNft<'info> {
         seeds = [OFFSET_METADATA_SEED, mint.key().as_ref()],
         bump
     )]
-    pub offset_metadata: UncheckedAccount<'info>, // so it doesn't fail here for uninitialized accounts
+    pub offset_metadata: SystemAccount<'info>, // so it doesn't fail here for uninitialized accounts
 }
 
 /** TODO: add offset update logic */

@@ -9,7 +9,6 @@ pub struct CreateOffsetTiers<'info> {
     #[account(mut)]
     pub payer: Signer<'info>,
     #[account(
-        mut,
         has_one = admin_authority
     )]
     pub global_state: Account<'info, GlobalState>,

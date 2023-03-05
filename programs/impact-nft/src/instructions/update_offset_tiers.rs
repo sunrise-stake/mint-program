@@ -8,7 +8,6 @@ use anchor_lang::prelude::*;
 pub struct UpdateOffsetTiers<'info> {
     pub admin_authority: Signer<'info>,
     #[account(
-        mut,
         has_one = admin_authority @ ErrorCode::InvalidAdminAuthority,
     )]
     pub global_state: Account<'info, GlobalState>,
