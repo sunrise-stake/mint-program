@@ -24,27 +24,6 @@ const TOKEN_METADATA_PROGRAM_ID = new PublicKey(
 // e.g. the sunrise program
 const mintAuthority = Keypair.generate();
 
-export const expectAmount = (
-  actualAmount: number | BN,
-  expectedAmount: number | BN,
-  tolerance = 0
-) => {
-  const actualAmountBN = new BN(actualAmount);
-  const minExpected = new BN(expectedAmount).subn(tolerance);
-  const maxExpected = new BN(expectedAmount).addn(tolerance);
-
-  console.log(
-    "Expecting",
-    actualAmountBN.toString(),
-    "to be at least",
-    "and at most",
-    new BN(maxExpected).toString()
-  );
-
-  expect(actualAmountBN.gte(minExpected)).to.be.true;
-  expect(actualAmountBN.lte(maxExpected)).to.be.true;
-};
-
 describe("impact-nft", () => {
   let client: ImpactNftClient;
   let user = Keypair.generate();
@@ -166,14 +145,14 @@ describe("impact-nft", () => {
   it("can update an nft", async () => {
     let accounts = client.getMintNftAccounts(mint.publicKey, user.publicKey);
 
+
+
     await program.methods
       .updateNft(updatedOffset)
       .accounts({
         ...accounts,
-        tokenAccount: accounts.userTokenAccount,
         globalState: client.stateAddress,
         mint: mint.publicKey,
-        tokenProgram: spl.TOKEN_PROGRAM_ID,
       })
       .signers([mintAuthority])
       .rpc();
