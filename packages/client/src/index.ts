@@ -77,6 +77,12 @@ export class ImpactNftClient {
     return client;
   }
 
+  public static async get(stateAddress: PublicKey): Promise<ImpactNftClient> {
+    const client = new ImpactNftClient(setUpAnchor());
+    await client.init(stateAddress);
+    return client;
+  }
+
   private async init(stateAddress: PublicKey): Promise<void> {
     const state = await this.program.account.globalState.fetch(stateAddress);
 
