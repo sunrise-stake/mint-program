@@ -3,19 +3,20 @@ use crate::seeds::{OFFSET_METADATA_SEED, OFFSET_TIERS_SEED};
 use crate::state::{GlobalState, OffsetMetadata, OffsetTiers};
 use crate::utils::metaplex::set_metadata_uri;
 use anchor_lang::prelude::*;
-use anchor_spl::token::{Mint, Token, TokenAccount};
+use anchor_lang::solana_program::program_option::COption;
+use anchor_spl::token::Mint;
 
 #[derive(Accounts)]
 pub struct UpdateNft<'info> {
     pub mint_authority: Signer<'info>,
-    #[account(mut)]
+    #[account(
+        mut,
+        constraint = mint.mint_authority == COption::Some(mint_authority.key()) @ ErrorCode::InvalidMintAuthority,
+    )]
     pub mint: Account<'info, Mint>,
-    pub token_program: Program<'info, Token>,
     /// CHECK: Checked in metaplex program
     #[account(mut)]
     pub metadata: UncheckedAccount<'info>,
-    #[account(mut)]
-    pub token_account: Account<'info, TokenAccount>,
     #[account(
         has_one = mint_authority @ ErrorCode::InvalidMintAuthority,
     )]

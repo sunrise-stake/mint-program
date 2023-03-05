@@ -224,17 +224,7 @@ export type ImpactNft = {
           "isSigner": false
         },
         {
-          "name": "tokenProgram",
-          "isMut": false,
-          "isSigner": false
-        },
-        {
           "name": "metadata",
-          "isMut": true,
-          "isSigner": false
-        },
-        {
-          "name": "tokenAccount",
           "isMut": true,
           "isSigner": false
         },
@@ -656,17 +646,7 @@ export const IDL: ImpactNft = {
           "isSigner": false
         },
         {
-          "name": "tokenProgram",
-          "isMut": false,
-          "isSigner": false
-        },
-        {
           "name": "metadata",
-          "isMut": true,
-          "isSigner": false
-        },
-        {
-          "name": "tokenAccount",
           "isMut": true,
           "isSigner": false
         },

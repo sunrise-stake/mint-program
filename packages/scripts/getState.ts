@@ -1,7 +1,5 @@
 import {ImpactNftClient, setUpAnchor} from "../client/src";
 import { PublicKey } from "@solana/web3.js";
-import {getTestMetadata} from "../tests/util";
-import BN from "bn.js";
 
 // USAGE
 // ANCHOR_WALLET=~/.config/solana/id.json ANCHOR_PROVIDER_URL=https://api.devnet.solana.com yarn ts-node packages/scripts/getState.ts <state-address>
