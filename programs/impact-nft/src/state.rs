@@ -92,7 +92,11 @@ impl OffsetMetadata {
     pub const SPACE: usize = 8 + 8 + 1;
 
     pub fn set(&mut self, offset: u64, bump: u8) {
-        self.offset = offset;
+        self.set_amount(offset);
         self.bump = bump;
+    }
+
+    pub fn set_amount(&mut self, offset: u64) {
+        self.offset = offset;
     }
 }
