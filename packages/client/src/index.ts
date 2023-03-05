@@ -77,8 +77,8 @@ export class ImpactNftClient {
     return client;
   }
 
-  public static async get(stateAddress: PublicKey): Promise<ImpactNftClient> {
-    const client = new ImpactNftClient(setUpAnchor());
+  public static async get(provider: AnchorProvider, stateAddress: PublicKey): Promise<ImpactNftClient> {
+    const client = new ImpactNftClient(provider);
     await client.init(stateAddress);
     return client;
   }
@@ -93,6 +93,20 @@ export class ImpactNftClient {
     };
 
     this.stateAddress = stateAddress;
+  }
+
+  public async details() {
+    if (!this.stateAddress) throw new Error("not initialized");
+
+    const state = await this.program.account.globalState.fetch(this.stateAddress);
+
+    const tiersAddress = this.getOffsetTiersAddress(this.stateAddress);
+    const tiers = await this.program.account.offsetTiers.fetch(tiersAddress);
+
+    return {
+        state,
+        tiers
+    }
   }
 
   public getOffsetTiersAddress(state: PublicKey): PublicKey {
