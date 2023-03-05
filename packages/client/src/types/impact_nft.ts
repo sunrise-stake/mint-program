@@ -73,7 +73,7 @@ export type ImpactNft = {
         },
         {
           "name": "globalState",
-          "isMut": true,
+          "isMut": false,
           "isSigner": false
         },
         {
@@ -106,7 +106,7 @@ export type ImpactNft = {
         },
         {
           "name": "globalState",
-          "isMut": true,
+          "isMut": false,
           "isSigner": false
         },
         {
@@ -240,12 +240,12 @@ export type ImpactNft = {
         },
         {
           "name": "globalState",
-          "isMut": true,
+          "isMut": false,
           "isSigner": false
         },
         {
           "name": "offsetTiers",
-          "isMut": true,
+          "isMut": false,
           "isSigner": false
         },
         {
@@ -505,7 +505,7 @@ export const IDL: ImpactNft = {
         },
         {
           "name": "globalState",
-          "isMut": true,
+          "isMut": false,
           "isSigner": false
         },
         {
@@ -538,7 +538,7 @@ export const IDL: ImpactNft = {
         },
         {
           "name": "globalState",
-          "isMut": true,
+          "isMut": false,
           "isSigner": false
         },
         {
@@ -672,12 +672,12 @@ export const IDL: ImpactNft = {
         },
         {
           "name": "globalState",
-          "isMut": true,
+          "isMut": false,
           "isSigner": false
         },
         {
           "name": "offsetTiers",
-          "isMut": true,
+          "isMut": false,
           "isSigner": false
         },
         {
