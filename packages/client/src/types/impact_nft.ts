@@ -134,7 +134,7 @@ export type ImpactNft = {
         },
         {
           "name": "mintAuthority",
-          "isMut": false,
+          "isMut": true,
           "isSigner": true
         },
         {
@@ -160,7 +160,10 @@ export type ImpactNft = {
         {
           "name": "mintNftTo",
           "isMut": true,
-          "isSigner": false
+          "isSigner": false,
+          "docs": [
+            "TODO move to init here using anchor's spl-token integration?"
+          ]
         },
         {
           "name": "associatedTokenProgram",
@@ -201,6 +204,21 @@ export type ImpactNft = {
           "name": "offsetMetadata",
           "isMut": true,
           "isSigner": false
+        },
+        {
+          "name": "collectionMint",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "collectionMetadata",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "collectionMasterEdition",
+          "isMut": false,
+          "isSigner": false
         }
       ],
       "args": [
@@ -214,12 +232,22 @@ export type ImpactNft = {
       "name": "updateNft",
       "accounts": [
         {
+          "name": "payer",
+          "isMut": true,
+          "isSigner": true
+        },
+        {
           "name": "mintAuthority",
-          "isMut": false,
+          "isMut": true,
           "isSigner": true
         },
         {
           "name": "mint",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "tokenProgram",
           "isMut": false,
           "isSigner": false
         },
@@ -241,6 +269,41 @@ export type ImpactNft = {
         {
           "name": "offsetMetadata",
           "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "newCollectionMint",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "newCollectionMetadata",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "newCollectionMasterEdition",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "collectionMint",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "collectionMetadata",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "collectionMasterEdition",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "tokenMetadataProgram",
+          "isMut": false,
           "isSigner": false
         }
       ],
@@ -298,6 +361,10 @@ export type ImpactNft = {
       "type": {
         "kind": "struct",
         "fields": [
+          {
+            "name": "currentLevelIndex",
+            "type": "u16"
+          },
           {
             "name": "offset",
             "type": "u64"
@@ -370,6 +437,10 @@ export type ImpactNft = {
           {
             "name": "symbol",
             "type": "string"
+          },
+          {
+            "name": "collectionMint",
+            "type": "publicKey"
           }
         ]
       }
@@ -556,7 +627,7 @@ export const IDL: ImpactNft = {
         },
         {
           "name": "mintAuthority",
-          "isMut": false,
+          "isMut": true,
           "isSigner": true
         },
         {
@@ -582,7 +653,10 @@ export const IDL: ImpactNft = {
         {
           "name": "mintNftTo",
           "isMut": true,
-          "isSigner": false
+          "isSigner": false,
+          "docs": [
+            "TODO move to init here using anchor's spl-token integration?"
+          ]
         },
         {
           "name": "associatedTokenProgram",
@@ -623,6 +697,21 @@ export const IDL: ImpactNft = {
           "name": "offsetMetadata",
           "isMut": true,
           "isSigner": false
+        },
+        {
+          "name": "collectionMint",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "collectionMetadata",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "collectionMasterEdition",
+          "isMut": false,
+          "isSigner": false
         }
       ],
       "args": [
@@ -636,12 +725,22 @@ export const IDL: ImpactNft = {
       "name": "updateNft",
       "accounts": [
         {
+          "name": "payer",
+          "isMut": true,
+          "isSigner": true
+        },
+        {
           "name": "mintAuthority",
-          "isMut": false,
+          "isMut": true,
           "isSigner": true
         },
         {
           "name": "mint",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "tokenProgram",
           "isMut": false,
           "isSigner": false
         },
@@ -663,6 +762,41 @@ export const IDL: ImpactNft = {
         {
           "name": "offsetMetadata",
           "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "newCollectionMint",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "newCollectionMetadata",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "newCollectionMasterEdition",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "collectionMint",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "collectionMetadata",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "collectionMasterEdition",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "tokenMetadataProgram",
+          "isMut": false,
           "isSigner": false
         }
       ],
@@ -720,6 +854,10 @@ export const IDL: ImpactNft = {
       "type": {
         "kind": "struct",
         "fields": [
+          {
+            "name": "currentLevelIndex",
+            "type": "u16"
+          },
           {
             "name": "offset",
             "type": "u64"
@@ -792,6 +930,10 @@ export const IDL: ImpactNft = {
           {
             "name": "symbol",
             "type": "string"
+          },
+          {
+            "name": "collectionMint",
+            "type": "publicKey"
           }
         ]
       }
