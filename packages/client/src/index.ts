@@ -36,7 +36,8 @@ export const setUpAnchor = (): anchor.AnchorProvider => {
 
 export interface ImpactNftClientConfig {
   mintAuthority: PublicKey;
-  adminAuthority: PublicKey;
+  updateAuthority: PublicKey;
+  tokenAuthority: PublicKey;
   levels: number;
 }
 
@@ -50,22 +51,24 @@ export class ImpactNftClient {
   }
 
   public static async register(
-    mintAuthority: PublicKey,
+    adminMintAuthority: PublicKey,
     levels: number
   ): Promise<ImpactNftClient> {
     const client = new ImpactNftClient(setUpAnchor());
     const state = Keypair.generate();
 
+    const tokenAuthority = client.getTokenAuthorityAddress(state.publicKey);
     const accounts = {
       payer: client.provider.publicKey,
-      adminAuthority: client.provider.publicKey,
+      adminUpdateAuthority: client.provider.publicKey,
       globalState: state.publicKey,
+      tokenAuthority,
       systemProgram: SystemProgram.programId,
     };
 
     await client.program.methods
       .createGlobalState({
-        mintAuthority,
+        adminMintAuthority,
         levels,
       })
       .accounts(accounts)
@@ -86,10 +89,12 @@ export class ImpactNftClient {
 
   private async init(stateAddress: PublicKey): Promise<void> {
     const state = await this.program.account.globalState.fetch(stateAddress);
+    const tokenAuthority = this.getTokenAuthorityAddress(stateAddress);
 
     this.config = {
-      mintAuthority: state.mintAuthority,
-      adminAuthority: state.adminAuthority,
+      mintAuthority: state.adminMintAuthority,
+      updateAuthority: state.adminUpdateAuthority,
+      tokenAuthority,
       levels: state.levels as number,
     };
 
@@ -108,6 +113,13 @@ export class ImpactNftClient {
         state,
         tiers
     }
+  }
+  
+  public getTokenAuthorityAddress(state: PublicKey): PublicKey {
+    return PublicKey.findProgramAddressSync(
+      [Buffer.from("token_authority"), state.toBuffer()],
+      PROGRAM_ID
+    )[0];
   }
 
   public getOffsetTiersAddress(state: PublicKey): PublicKey {
@@ -165,7 +177,7 @@ export class ImpactNftClient {
         levels,
       })
       .accounts({
-        adminAuthority: client.provider.publicKey,
+        adminUpdateAuthority: client.provider.publicKey,
         globalState: this.stateAddress,
         offsetTiers,
         systemProgram: SystemProgram.programId,
@@ -180,7 +192,8 @@ export class ImpactNftClient {
   ): {
     program: PublicKey;
     tokenMetadataProgram: PublicKey;
-    mintAuthority: PublicKey;
+    adminMintAuthority: PublicKey;
+    tokenAuthority: PublicKey;
     metadata: PublicKey;
     userTokenAccount: PublicKey;
     masterEdition: PublicKey;
@@ -202,7 +215,8 @@ export class ImpactNftClient {
     return {
       program: PROGRAM_ID,
       tokenMetadataProgram: TOKEN_METADATA_PROGRAM_ID,
-      mintAuthority: this.config.mintAuthority,
+      adminMintAuthority: this.config.mintAuthority,
+      tokenAuthority: this.getTokenAuthorityAddress(this.stateAddress),
       metadata,
       userTokenAccount,
       masterEdition,

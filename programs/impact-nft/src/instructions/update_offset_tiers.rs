@@ -3,12 +3,14 @@ use crate::seeds::OFFSET_TIERS_SEED;
 use crate::state::{GlobalState, OffsetTiers, OffsetTiersInput};
 use anchor_lang::prelude::*;
 
+/// Permissioned. Requires the admin_update_authority
+/// for verification
 #[derive(Accounts, Clone)]
 #[instruction(state: OffsetTiersInput)]
 pub struct UpdateOffsetTiers<'info> {
-    pub admin_authority: Signer<'info>,
+    pub admin_update_authority: Signer<'info>,
     #[account(
-        has_one = admin_authority @ ErrorCode::InvalidAdminAuthority,
+        has_one = admin_update_authority @ ErrorCode::InvalidAdminAuthority,
     )]
     pub global_state: Account<'info, GlobalState>,
     #[account(

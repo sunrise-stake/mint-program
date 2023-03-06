@@ -17,7 +17,6 @@ wallet = "packages/tests/fixtures/id.json"
 [scripts]
 test = "yarn run ts-mocha -p ./tsconfig.json -t 1000000 packages/tests/**/*.ts"
 
-
 [[test.genesis]]
 address = "metaqbxxUerdq28cj1RbAWkYQm3ybzjb6a8bt518x1s"
 program = "packages/tests/fixtures/mpl_token_metadata.so"
