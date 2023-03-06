@@ -6,6 +6,7 @@ pub fn set_offset_metadata<'a>(
     offset_metadata: &AccountInfo<'a>,
     offset_amount: u64,
     offset_metadata_bump: u8,
+    level: usize,
 ) -> Result<()> {
     require_keys_eq!(*offset_metadata.owner, crate::ID);
     {
@@ -17,7 +18,7 @@ pub fn set_offset_metadata<'a>(
 
     /* set offset metadata */
     let mut owned_offset_metadata = Account::<'a, OffsetMetadata>::try_from(offset_metadata)?;
-    owned_offset_metadata.set(offset_amount, offset_metadata_bump);
+    owned_offset_metadata.set(offset_amount, offset_metadata_bump, level as u16);
 
     // Serialize changes back into account, skipping the space allocated to discriminator
     owned_offset_metadata.serialize(&mut &mut offset_metadata.data.borrow_mut()[8..])?;

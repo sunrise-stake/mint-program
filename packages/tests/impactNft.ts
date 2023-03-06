@@ -3,7 +3,6 @@ import * as spl from "@solana/spl-token";
 import { Program } from "@coral-xyz/anchor";
 import { ImpactNft } from "../client/src/types/impact_nft";
 import { expect } from "chai";
-import testAuthority from "./fixtures/id.json";
 import BN from "bn.js";
 import { ImpactNftClient, confirm } from "../client/src";
 import {
@@ -11,15 +10,19 @@ import {
   LAMPORTS_PER_SOL,
   PublicKey,
   SystemProgram,
+  ComputeBudgetProgram,
 } from "@solana/web3.js";
-import { getTestMetadata } from "./util";
 import { assert } from "chai";
 import { TOKEN_PROGRAM_ID } from "@solana/spl-token";
+import { Level } from "../client/src";
+import {
+  createMetaplexInstance,
+  initializeTestCollection,
+  getTestMetadata,
+} from "./util";
 
 const program = anchor.workspace.ImpactNft as Program<ImpactNft>;
-const TOKEN_METADATA_PROGRAM_ID = new PublicKey(
-  "metaqbxxUerdq28cj1RbAWkYQm3ybzjb6a8bt518x1s"
-);
+
 // This would typically be a PDA onwed by a different program
 // e.g. the sunrise program
 const mintAuthority = Keypair.generate();
@@ -59,9 +62,11 @@ describe("impact-nft", () => {
   let stateAddress: PublicKey;
 
   const initialOffset = new BN(140); // should still default to a level0 nft
-  const updatedOffset = new BN(180); // should upgrade to a level1 nft
+  const updateOffset = new BN(220); // should upgrade to a level1 nft
 
   const mint = Keypair.generate();
+
+  let levels: Array<Level>;
 
   it("Can register a new global state", async () => {
     const levels = 10;
@@ -82,28 +87,51 @@ describe("impact-nft", () => {
   });
 
   it("Can create offset tiers", async () => {
-    const meta = getTestMetadata();
+    const metadata = getTestMetadata();
+    const metaplex = createMetaplexInstance(client.provider.connection);
 
-    const level1 = {
+    const mint1 = await initializeTestCollection(
+      metaplex,
+      metadata[0],
+      "sunriseStake0Collection",
+      mintAuthority.publicKey
+    );
+    const mint2 = await initializeTestCollection(
+      metaplex,
+      metadata[1],
+      "sunriseStake1Collection",
+      mintAuthority.publicKey
+    );
+    const mint3 = await initializeTestCollection(
+      metaplex,
+      metadata[2],
+      "sunriseStake2Collection",
+      mintAuthority.publicKey
+    );
+
+    const level1: Level = {
       offset: new BN(100), // tier 0 limit
-      uri: meta[0],
+      uri: metadata[0],
       name: "sunriseStake0",
       symbol: "sun0",
+      collectionMint: mint1.publicKey,
     };
     const level2 = {
       offset: new BN(200), // tier 1 limit
-      uri: meta[1],
+      uri: metadata[1],
       name: "sunriseStake1",
       symbol: "sun1",
+      collectionMint: mint2.publicKey,
     };
     const level3 = {
       offset: new BN(300), // tier 2 limit
-      uri: meta[2],
+      uri: metadata[2],
       name: "sunriseStake2",
       symbol: "sun2",
+      collectionMint: mint3.publicKey,
     };
 
-    const levels = [level1, level2, level3];
+    levels = [level1, level2, level3];
     await client.registerOffsetTiers(levels);
 
     const offsetTiersAddress = client.getOffsetTiersAddress(
@@ -131,8 +159,20 @@ describe("impact-nft", () => {
     console.log("user", user.publicKey.toBase58());
     console.log("mintAuthority", mintAuthority.publicKey.toBase58());
 
+    const modifyComputeUnits = ComputeBudgetProgram.setComputeUnitLimit({
+      units: 300000,
+    });
+
+    const collectionMint = levels[0].collectionMint;
+    const collectionMetadata = client.getMetadataAddress(collectionMint);
+    const collectionMasterEdition =
+      client.getMasterEditionAddress(collectionMint);
+
     const accounts = {
       ...mintNftAccounts,
+      collectionMint,
+      collectionMetadata,
+      collectionMasterEdition,
       payer: client.provider.publicKey,
       mint: mint.publicKey,
       tokenProgram: TOKEN_PROGRAM_ID,
@@ -143,14 +183,18 @@ describe("impact-nft", () => {
       rent: anchor.web3.SYSVAR_RENT_PUBKEY,
       globalState: client.stateAddress,
     };
-    console.log("accounts", accounts);
 
-    await client.program.methods
-      .mintNft(initialOffset)
-      .accounts(accounts)
-      .signers([mint, mintAuthority])
-      .rpc()
-      .then(() => confirm(client.provider.connection));
+    try {
+      await client.program.methods
+        .mintNft(initialOffset)
+        .accounts(accounts)
+        .signers([mint, mintAuthority])
+        .preInstructions([modifyComputeUnits])
+        .rpc()
+        .then(() => confirm(client.provider.connection));
+    } catch (err) {
+      console.log(err);
+    }
 
     const value = await program.provider.connection
       .getTokenAccountBalance(mintNftAccounts.userTokenAccount)
@@ -164,24 +208,33 @@ describe("impact-nft", () => {
   });
 
   it("can update an nft", async () => {
-    let accounts = client.getMintNftAccounts(mint.publicKey, user.publicKey);
+    const accounts = client.getMintNftAccounts(mint.publicKey, user.publicKey);
+    const updateAccounts = await client.getUpdateNftAccounts(
+      mint.publicKey,
+      updateOffset
+    );
 
-    await program.methods
-      .updateNft(updatedOffset)
-      .accounts({
-        ...accounts,
-        tokenAccount: accounts.userTokenAccount,
-        globalState: client.stateAddress,
-        mint: mint.publicKey,
-        tokenProgram: spl.TOKEN_PROGRAM_ID,
-      })
-      .signers([mintAuthority])
-      .rpc();
+    try {
+      await program.methods
+        .updateNft(updateOffset)
+        .accounts({
+          ...accounts,
+          ...updateAccounts,
+          tokenAccount: accounts.userTokenAccount,
+          globalState: client.stateAddress,
+          mint: mint.publicKey,
+          tokenProgram: spl.TOKEN_PROGRAM_ID,
+        })
+        .signers([mintAuthority])
+        .rpc();
+    } catch (err) {
+      console.log(err);
+    }
 
     let offsetMetadata = await program.account.offsetMetadata.fetch(
       accounts.offsetMetadata
     );
-    assert(offsetMetadata.offset.eq(updatedOffset));
+    assert(offsetMetadata.offset.eq(updateOffset));
 
     // TODO: Find a way to validate that the mpl metadata is indeed updated
   });

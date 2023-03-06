@@ -33,17 +33,17 @@ impl GlobalState {
 /**
  * The Level struct is used to store the offset tiers.
  */
-#[derive(AnchorSerialize, AnchorDeserialize, Clone)]
+#[derive(AnchorSerialize, AnchorDeserialize, Clone, PartialEq)]
 pub struct Level {
-    pub offset: u64,    // 8
-    pub uri: String,    // 200
-    pub name: String,   // 30
-    pub symbol: String, // 10
+    pub offset: u64,
+    pub uri: String,    //mplx limit of 200
+    pub name: String,   //mplx limit of 32
+    pub symbol: String, //mplx limit of 10
+    pub collection_mint: Pubkey,
 }
-//TODO: need a way to enforce that neither name nor symbol exceeds their bounds
 
 impl Level {
-    pub const SPACE: usize = 8 + 200 + 30 + 15;
+    pub const SPACE: usize = 8 + (4 + 200) + (4 + 32) + (4 + 10) + 15 + 32;
 }
 
 #[account]
@@ -58,9 +58,10 @@ pub struct OffsetTiersInput {
 }
 
 impl OffsetTiers {
+    pub const MAX_LEVELS: usize = 10;
     /** Allocate up to 10 levels (can be modified) */
     pub const SPACE: usize = 4   // vec
-        + (Level::SPACE * 10)    // 10 levels
+        + (Level::SPACE * Self::MAX_LEVELS)
         + 1                      // bump
         + 8; // discriminator
 
@@ -69,6 +70,11 @@ impl OffsetTiers {
     }
 
     pub fn get_level(&self, offset: u64) -> Option<&Level> {
+        let index = self.get_index_from_offset(offset)?;
+        Some(&self.levels[index])
+    }
+
+    pub fn get_index_from_offset(&self, offset: u64) -> Option<usize> {
         let level_index = match self
             .levels
             .iter()
@@ -78,21 +84,23 @@ impl OffsetTiers {
             Some(i) => self.levels.len() - 1 - i,
             None => 0,
         };
-        Some(&self.levels[level_index])
+        Some(level_index)
     }
 }
 
 #[account]
 pub struct OffsetMetadata {
+    pub current_level_index: u16,
     pub offset: u64,
     pub bump: u8,
 }
 
 impl OffsetMetadata {
-    pub const SPACE: usize = 8 + 8 + 1;
+    pub const SPACE: usize = 8 + 2 + 8 + 1;
 
-    pub fn set(&mut self, offset: u64, bump: u8) {
+    pub fn set(&mut self, offset: u64, bump: u8, level_index: u16) {
         self.offset = offset;
         self.bump = bump;
+        self.current_level_index = level_index;
     }
 }

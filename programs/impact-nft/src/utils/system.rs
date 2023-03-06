@@ -6,6 +6,7 @@ use anchor_lang::Discriminator;
 
 pub fn create_offset_metadata_account<'a>(
     program_id: &Pubkey,
+    global_state: Pubkey,
     payer: AccountInfo<'a>,
     mint: Pubkey,
     pda: AccountInfo<'a>,
@@ -23,7 +24,12 @@ pub fn create_offset_metadata_account<'a>(
         program_id,
     );
 
-    let seed = &[OFFSET_METADATA_SEED, mint.as_ref(), &[bump]];
+    let seed = &[
+        OFFSET_METADATA_SEED,
+        mint.as_ref(),
+        global_state.as_ref(),
+        &[bump],
+    ];
 
     // Send the system instruction to the runtime for processing
     solana_program::program::invoke_signed(
