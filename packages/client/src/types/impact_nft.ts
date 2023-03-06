@@ -220,7 +220,7 @@ export type ImpactNft = {
         },
         {
           "name": "mint",
-          "isMut": true,
+          "isMut": false,
           "isSigner": false
         },
         {
@@ -642,7 +642,7 @@ export const IDL: ImpactNft = {
         },
         {
           "name": "mint",
-          "isMut": true,
+          "isMut": false,
           "isSigner": false
         },
         {
