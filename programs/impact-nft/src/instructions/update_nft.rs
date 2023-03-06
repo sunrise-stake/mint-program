@@ -3,7 +3,7 @@ use crate::seeds::{OFFSET_METADATA_SEED, OFFSET_TIERS_SEED};
 use crate::state::{GlobalState, OffsetMetadata, OffsetTiers};
 use crate::utils::metaplex::set_metadata_uri;
 use anchor_lang::prelude::*;
-use anchor_spl::token::{Mint, TokenAccount};
+use anchor_spl::token::Mint;
 
 #[derive(Accounts)]
 pub struct UpdateNft<'info> {

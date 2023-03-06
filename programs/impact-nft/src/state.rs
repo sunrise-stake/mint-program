@@ -33,7 +33,7 @@ impl GlobalState {
 /**
  * The Level struct is used to store the offset tiers.
  */
-#[derive(AnchorSerialize, AnchorDeserialize, Clone)]
+#[derive(AnchorSerialize, AnchorDeserialize, Clone, Debug)]
 pub struct Level {
     pub offset: u64,    // 8
     pub uri: String,    // 200
@@ -47,6 +47,7 @@ impl Level {
 }
 
 #[account]
+#[derive(Debug)]
 pub struct OffsetTiers {
     pub levels: Vec<Level>,
     pub bump: u8,
@@ -78,6 +79,22 @@ impl OffsetTiers {
             Some(i) => self.levels.len() - 1 - i,
             None => 0,
         };
+        msg!(
+            "Level for offset {} is {} (starts at {})",
+            offset,
+            level_index,
+            self.levels[level_index].offset
+        );
+
+        if level_index < self.levels.len() - 1 {
+            msg!(
+                "Next level at offset {}",
+                self.levels[level_index + 1].offset
+            );
+        } else {
+            msg!("This is the max level");
+        }
+
         Some(&self.levels[level_index])
     }
 }

@@ -104,9 +104,9 @@ pub fn create_master_edition_account<'a>(
     Ok(())
 }
 
-pub fn set_metadata_uri<'a>(
-    offset_tiers: &Account<'a, OffsetTiers>,
-    metadata: &AccountInfo<'a>,
+pub fn set_metadata_uri(
+    offset_tiers: &OffsetTiers,
+    metadata: &AccountInfo<'_>,
     offset_amount: u64,
 ) -> Result<()> {
     let default_level = &offset_tiers.levels[0];
@@ -117,6 +117,8 @@ pub fn set_metadata_uri<'a>(
 
     let mut metadata: Metadata =
         TokenMetadataAccount::from_account_info(&metadata.to_account_info())?;
+    msg!("Old level metadata: {}", metadata.data.uri);
+    msg!("New level metadata: {}", level.uri);
     metadata.data.uri = level.uri.to_string();
 
     Ok(())
