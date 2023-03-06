@@ -11,7 +11,7 @@ export type ImpactNft = {
           "isSigner": true
         },
         {
-          "name": "adminAuthority",
+          "name": "adminUpdateAuthority",
           "isMut": false,
           "isSigner": true
         },
@@ -19,6 +19,17 @@ export type ImpactNft = {
           "name": "globalState",
           "isMut": true,
           "isSigner": true
+        },
+        {
+          "name": "tokenAuthority",
+          "isMut": false,
+          "isSigner": false,
+          "docs": [
+            "The account Metaplex recognizes as the update_authority for",
+            "the tokens. Any instruction that uses it still requires at least",
+            "one of the EOA and PDA authorities for checking validity, but it",
+            "can be used with either"
+          ]
         },
         {
           "name": "systemProgram",
@@ -39,7 +50,7 @@ export type ImpactNft = {
       "name": "updateGlobalState",
       "accounts": [
         {
-          "name": "adminAuthority",
+          "name": "adminUpdateAuthority",
           "isMut": false,
           "isSigner": true
         },
@@ -62,7 +73,7 @@ export type ImpactNft = {
       "name": "createOffsetTiers",
       "accounts": [
         {
-          "name": "adminAuthority",
+          "name": "adminUpdateAuthority",
           "isMut": false,
           "isSigner": true
         },
@@ -100,7 +111,7 @@ export type ImpactNft = {
       "name": "updateOffsetTiers",
       "accounts": [
         {
-          "name": "adminAuthority",
+          "name": "adminUpdateAuthority",
           "isMut": false,
           "isSigner": true
         },
@@ -133,9 +144,29 @@ export type ImpactNft = {
           "isSigner": true
         },
         {
-          "name": "mintAuthority",
+          "name": "adminMintAuthority",
           "isMut": true,
           "isSigner": true
+        },
+        {
+          "name": "tokenAuthority",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "globalState",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "offsetTiers",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "offsetMetadata",
+          "isMut": true,
+          "isSigner": false
         },
         {
           "name": "mint",
@@ -143,12 +174,17 @@ export type ImpactNft = {
           "isSigner": true
         },
         {
-          "name": "tokenProgram",
-          "isMut": false,
+          "name": "metadata",
+          "isMut": true,
           "isSigner": false
         },
         {
-          "name": "metadata",
+          "name": "masterEdition",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "mintNftTo",
           "isMut": true,
           "isSigner": false
         },
@@ -158,8 +194,23 @@ export type ImpactNft = {
           "isSigner": false
         },
         {
-          "name": "mintNftTo",
+          "name": "collectionMint",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "collectionMetadata",
           "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "collectionMasterEdition",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "tokenProgram",
+          "isMut": false,
           "isSigner": false
         },
         {
@@ -181,41 +232,6 @@ export type ImpactNft = {
           "name": "rent",
           "isMut": false,
           "isSigner": false
-        },
-        {
-          "name": "masterEdition",
-          "isMut": true,
-          "isSigner": false
-        },
-        {
-          "name": "globalState",
-          "isMut": false,
-          "isSigner": false
-        },
-        {
-          "name": "offsetTiers",
-          "isMut": false,
-          "isSigner": false
-        },
-        {
-          "name": "offsetMetadata",
-          "isMut": true,
-          "isSigner": false
-        },
-        {
-          "name": "collectionMint",
-          "isMut": false,
-          "isSigner": false
-        },
-        {
-          "name": "collectionMetadata",
-          "isMut": true,
-          "isSigner": false
-        },
-        {
-          "name": "collectionMasterEdition",
-          "isMut": false,
-          "isSigner": false
         }
       ],
       "args": [
@@ -234,28 +250,13 @@ export type ImpactNft = {
           "isSigner": true
         },
         {
-          "name": "mintAuthority",
+          "name": "adminMintAuthority",
           "isMut": true,
           "isSigner": true
         },
         {
-          "name": "mint",
-          "isMut": true,
-          "isSigner": false
-        },
-        {
-          "name": "tokenProgram",
+          "name": "tokenAuthority",
           "isMut": false,
-          "isSigner": false
-        },
-        {
-          "name": "metadata",
-          "isMut": true,
-          "isSigner": false
-        },
-        {
-          "name": "tokenAccount",
-          "isMut": true,
           "isSigner": false
         },
         {
@@ -270,6 +271,21 @@ export type ImpactNft = {
         },
         {
           "name": "offsetMetadata",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "mint",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "metadata",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "tokenAccount",
           "isMut": true,
           "isSigner": false
         },
@@ -304,6 +320,11 @@ export type ImpactNft = {
           "isSigner": false
         },
         {
+          "name": "tokenProgram",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
           "name": "tokenMetadataProgram",
           "isMut": false,
           "isSigner": false
@@ -324,11 +345,11 @@ export type ImpactNft = {
         "kind": "struct",
         "fields": [
           {
-            "name": "adminAuthority",
+            "name": "adminUpdateAuthority",
             "type": "publicKey"
           },
           {
-            "name": "mintAuthority",
+            "name": "adminMintAuthority",
             "type": "publicKey"
           },
           {
@@ -386,7 +407,7 @@ export type ImpactNft = {
         "kind": "struct",
         "fields": [
           {
-            "name": "mintAuthority",
+            "name": "adminMintAuthority",
             "type": "publicKey"
           },
           {
@@ -402,11 +423,11 @@ export type ImpactNft = {
         "kind": "struct",
         "fields": [
           {
-            "name": "adminAuthority",
+            "name": "adminUpdateAuthority",
             "type": "publicKey"
           },
           {
-            "name": "mintAuthority",
+            "name": "adminMintAuthority",
             "type": "publicKey"
           },
           {
@@ -506,7 +527,7 @@ export const IDL: ImpactNft = {
           "isSigner": true
         },
         {
-          "name": "adminAuthority",
+          "name": "adminUpdateAuthority",
           "isMut": false,
           "isSigner": true
         },
@@ -514,6 +535,17 @@ export const IDL: ImpactNft = {
           "name": "globalState",
           "isMut": true,
           "isSigner": true
+        },
+        {
+          "name": "tokenAuthority",
+          "isMut": false,
+          "isSigner": false,
+          "docs": [
+            "The account Metaplex recognizes as the update_authority for",
+            "the tokens. Any instruction that uses it still requires at least",
+            "one of the EOA and PDA authorities for checking validity, but it",
+            "can be used with either"
+          ]
         },
         {
           "name": "systemProgram",
@@ -534,7 +566,7 @@ export const IDL: ImpactNft = {
       "name": "updateGlobalState",
       "accounts": [
         {
-          "name": "adminAuthority",
+          "name": "adminUpdateAuthority",
           "isMut": false,
           "isSigner": true
         },
@@ -557,7 +589,7 @@ export const IDL: ImpactNft = {
       "name": "createOffsetTiers",
       "accounts": [
         {
-          "name": "adminAuthority",
+          "name": "adminUpdateAuthority",
           "isMut": false,
           "isSigner": true
         },
@@ -595,7 +627,7 @@ export const IDL: ImpactNft = {
       "name": "updateOffsetTiers",
       "accounts": [
         {
-          "name": "adminAuthority",
+          "name": "adminUpdateAuthority",
           "isMut": false,
           "isSigner": true
         },
@@ -628,9 +660,29 @@ export const IDL: ImpactNft = {
           "isSigner": true
         },
         {
-          "name": "mintAuthority",
+          "name": "adminMintAuthority",
           "isMut": true,
           "isSigner": true
+        },
+        {
+          "name": "tokenAuthority",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "globalState",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "offsetTiers",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "offsetMetadata",
+          "isMut": true,
+          "isSigner": false
         },
         {
           "name": "mint",
@@ -638,12 +690,17 @@ export const IDL: ImpactNft = {
           "isSigner": true
         },
         {
-          "name": "tokenProgram",
-          "isMut": false,
+          "name": "metadata",
+          "isMut": true,
           "isSigner": false
         },
         {
-          "name": "metadata",
+          "name": "masterEdition",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "mintNftTo",
           "isMut": true,
           "isSigner": false
         },
@@ -653,8 +710,23 @@ export const IDL: ImpactNft = {
           "isSigner": false
         },
         {
-          "name": "mintNftTo",
+          "name": "collectionMint",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "collectionMetadata",
           "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "collectionMasterEdition",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "tokenProgram",
+          "isMut": false,
           "isSigner": false
         },
         {
@@ -676,41 +748,6 @@ export const IDL: ImpactNft = {
           "name": "rent",
           "isMut": false,
           "isSigner": false
-        },
-        {
-          "name": "masterEdition",
-          "isMut": true,
-          "isSigner": false
-        },
-        {
-          "name": "globalState",
-          "isMut": false,
-          "isSigner": false
-        },
-        {
-          "name": "offsetTiers",
-          "isMut": false,
-          "isSigner": false
-        },
-        {
-          "name": "offsetMetadata",
-          "isMut": true,
-          "isSigner": false
-        },
-        {
-          "name": "collectionMint",
-          "isMut": false,
-          "isSigner": false
-        },
-        {
-          "name": "collectionMetadata",
-          "isMut": true,
-          "isSigner": false
-        },
-        {
-          "name": "collectionMasterEdition",
-          "isMut": false,
-          "isSigner": false
         }
       ],
       "args": [
@@ -729,28 +766,13 @@ export const IDL: ImpactNft = {
           "isSigner": true
         },
         {
-          "name": "mintAuthority",
+          "name": "adminMintAuthority",
           "isMut": true,
           "isSigner": true
         },
         {
-          "name": "mint",
-          "isMut": true,
-          "isSigner": false
-        },
-        {
-          "name": "tokenProgram",
+          "name": "tokenAuthority",
           "isMut": false,
-          "isSigner": false
-        },
-        {
-          "name": "metadata",
-          "isMut": true,
-          "isSigner": false
-        },
-        {
-          "name": "tokenAccount",
-          "isMut": true,
           "isSigner": false
         },
         {
@@ -765,6 +787,21 @@ export const IDL: ImpactNft = {
         },
         {
           "name": "offsetMetadata",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "mint",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "metadata",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "tokenAccount",
           "isMut": true,
           "isSigner": false
         },
@@ -799,6 +836,11 @@ export const IDL: ImpactNft = {
           "isSigner": false
         },
         {
+          "name": "tokenProgram",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
           "name": "tokenMetadataProgram",
           "isMut": false,
           "isSigner": false
@@ -819,11 +861,11 @@ export const IDL: ImpactNft = {
         "kind": "struct",
         "fields": [
           {
-            "name": "adminAuthority",
+            "name": "adminUpdateAuthority",
             "type": "publicKey"
           },
           {
-            "name": "mintAuthority",
+            "name": "adminMintAuthority",
             "type": "publicKey"
           },
           {
@@ -881,7 +923,7 @@ export const IDL: ImpactNft = {
         "kind": "struct",
         "fields": [
           {
-            "name": "mintAuthority",
+            "name": "adminMintAuthority",
             "type": "publicKey"
           },
           {
@@ -897,11 +939,11 @@ export const IDL: ImpactNft = {
         "kind": "struct",
         "fields": [
           {
-            "name": "adminAuthority",
+            "name": "adminUpdateAuthority",
             "type": "publicKey"
           },
           {
-            "name": "mintAuthority",
+            "name": "adminMintAuthority",
             "type": "publicKey"
           },
           {

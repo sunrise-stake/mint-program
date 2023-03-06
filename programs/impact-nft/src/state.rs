@@ -1,31 +1,44 @@
 use anchor_lang::prelude::*;
 
+/*
+Contains both the admin_update_authority and the admin_mint_authority
+for future comparison and verification. Both are external authorities
+and at least one is needed for any instruction. The distinction is so
+that authority privileges are shared between a signer for permissionless
+ixs that can be an external program's PDA, and a signer for permissioned
+ixs that don't need to go through the calling program.
+*/
 #[account]
 pub struct GlobalState {
-    pub admin_authority: Pubkey, // Typically an EOA
-    pub mint_authority: Pubkey,  // Typically a PDA
+    pub admin_update_authority: Pubkey, // Typically an EOA
+    pub admin_mint_authority: Pubkey,   // Typically a PDA
     // number of levels, can probably be capped at u8 or u16
     pub levels: u16,
 }
 
 #[derive(AnchorSerialize, AnchorDeserialize, Clone)]
 pub struct GlobalStateCreateInput {
-    pub mint_authority: Pubkey,
+    pub admin_mint_authority: Pubkey,
     pub levels: u16,
 }
 #[derive(AnchorSerialize, AnchorDeserialize, Clone)]
 pub struct GlobalStateUpdateInput {
-    pub admin_authority: Pubkey,
-    pub mint_authority: Pubkey,
+    pub admin_update_authority: Pubkey,
+    pub admin_mint_authority: Pubkey,
     pub levels: u16,
 }
 
 impl GlobalState {
     pub const SPACE: usize = 8 + 32 + 32 + 2;
 
-    pub fn set(&mut self, admin_authority: Pubkey, mint_authority: Pubkey, levels: u16) {
-        self.admin_authority = admin_authority;
-        self.mint_authority = mint_authority;
+    pub fn set(
+        &mut self,
+        admin_update_authority: Pubkey,
+        admin_mint_authority: Pubkey,
+        levels: u16,
+    ) {
+        self.admin_update_authority = admin_update_authority;
+        self.admin_mint_authority = admin_mint_authority;
         self.levels = levels;
     }
 }

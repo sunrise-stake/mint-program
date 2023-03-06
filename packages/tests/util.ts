@@ -1,7 +1,4 @@
-import {
-  Metaplex,
-  keypairIdentity,
-} from "@metaplex-foundation/js";
+import { Metaplex, keypairIdentity } from "@metaplex-foundation/js";
 import { Connection, PublicKey, Keypair } from "@solana/web3.js";
 import fs from "fs";
 
@@ -20,7 +17,7 @@ export const initializeTestCollection = async (
   metaplex: Metaplex,
   uri: string,
   name: string,
-  mintAuthority: PublicKey
+  collectionAuthority: PublicKey
 ): Promise<Keypair> => {
   const mint = Keypair.generate();
 
@@ -34,7 +31,7 @@ export const initializeTestCollection = async (
 
   await metaplex.nfts().update({
     nftOrSft: nft,
-    newUpdateAuthority: mintAuthority,
+    newUpdateAuthority: collectionAuthority,
   });
 
   return mint;
