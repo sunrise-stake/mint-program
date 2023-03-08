@@ -201,11 +201,36 @@ export type ImpactNft = {
           "name": "offsetMetadata",
           "isMut": true,
           "isSigner": false
+        },
+        {
+          "name": "payerTokenAccount",
+          "isMut": true,
+          "isSigner": false,
+          "isOptional": true
+        },
+        {
+          "name": "recipient",
+          "isMut": true,
+          "isSigner": false,
+          "isOptional": true,
+          "docs": [
+            "CHECK, can be anything as long as it matches the recipient in the fee config"
+          ]
+        },
+        {
+          "name": "recipientTokenAccount",
+          "isMut": true,
+          "isSigner": false,
+          "isOptional": true
         }
       ],
       "args": [
         {
           "name": "offsetAmount",
+          "type": "u64"
+        },
+        {
+          "name": "principal",
           "type": "u64"
         }
       ]
@@ -269,6 +294,14 @@ export type ImpactNft = {
           {
             "name": "levels",
             "type": "u16"
+          },
+          {
+            "name": "fee",
+            "type": {
+              "option": {
+                "defined": "FeeConfig"
+              }
+            }
           }
         ]
       }
@@ -312,6 +345,40 @@ export type ImpactNft = {
   ],
   "types": [
     {
+      "name": "FeeConfig",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "fee",
+            "type": "u64"
+          },
+          {
+            "name": "recipient",
+            "type": "publicKey"
+          },
+          {
+            "name": "feeType",
+            "type": {
+              "defined": "FeeType"
+            }
+          },
+          {
+            "name": "coinType",
+            "type": {
+              "defined": "CoinType"
+            }
+          },
+          {
+            "name": "splTokenMint",
+            "type": {
+              "option": "publicKey"
+            }
+          }
+        ]
+      }
+    },
+    {
       "name": "GlobalStateCreateInput",
       "type": {
         "kind": "struct",
@@ -323,6 +390,14 @@ export type ImpactNft = {
           {
             "name": "levels",
             "type": "u16"
+          },
+          {
+            "name": "fee",
+            "type": {
+              "option": {
+                "defined": "FeeConfig"
+              }
+            }
           }
         ]
       }
@@ -343,6 +418,14 @@ export type ImpactNft = {
           {
             "name": "levels",
             "type": "u16"
+          },
+          {
+            "name": "fee",
+            "type": {
+              "option": {
+                "defined": "FeeConfig"
+              }
+            }
           }
         ]
       }
@@ -389,6 +472,34 @@ export type ImpactNft = {
           }
         ]
       }
+    },
+    {
+      "name": "FeeType",
+      "type": {
+        "kind": "enum",
+        "variants": [
+          {
+            "name": "Fixed"
+          },
+          {
+            "name": "Percentage"
+          }
+        ]
+      }
+    },
+    {
+      "name": "CoinType",
+      "type": {
+        "kind": "enum",
+        "variants": [
+          {
+            "name": "Native"
+          },
+          {
+            "name": "Spl"
+          }
+        ]
+      }
     }
   ],
   "errors": [
@@ -416,6 +527,11 @@ export type ImpactNft = {
       "code": 6004,
       "name": "InvalidUpdateForMint",
       "msg": "Invalid update for mint"
+    },
+    {
+      "code": 6005,
+      "name": "InvalidFeeRecipient",
+      "msg": "Invalid fee recipient account"
     }
   ]
 };
@@ -623,11 +739,36 @@ export const IDL: ImpactNft = {
           "name": "offsetMetadata",
           "isMut": true,
           "isSigner": false
+        },
+        {
+          "name": "payerTokenAccount",
+          "isMut": true,
+          "isSigner": false,
+          "isOptional": true
+        },
+        {
+          "name": "recipient",
+          "isMut": true,
+          "isSigner": false,
+          "isOptional": true,
+          "docs": [
+            "CHECK, can be anything as long as it matches the recipient in the fee config"
+          ]
+        },
+        {
+          "name": "recipientTokenAccount",
+          "isMut": true,
+          "isSigner": false,
+          "isOptional": true
         }
       ],
       "args": [
         {
           "name": "offsetAmount",
+          "type": "u64"
+        },
+        {
+          "name": "principal",
           "type": "u64"
         }
       ]
@@ -691,6 +832,14 @@ export const IDL: ImpactNft = {
           {
             "name": "levels",
             "type": "u16"
+          },
+          {
+            "name": "fee",
+            "type": {
+              "option": {
+                "defined": "FeeConfig"
+              }
+            }
           }
         ]
       }
@@ -734,6 +883,40 @@ export const IDL: ImpactNft = {
   ],
   "types": [
     {
+      "name": "FeeConfig",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "fee",
+            "type": "u64"
+          },
+          {
+            "name": "recipient",
+            "type": "publicKey"
+          },
+          {
+            "name": "feeType",
+            "type": {
+              "defined": "FeeType"
+            }
+          },
+          {
+            "name": "coinType",
+            "type": {
+              "defined": "CoinType"
+            }
+          },
+          {
+            "name": "splTokenMint",
+            "type": {
+              "option": "publicKey"
+            }
+          }
+        ]
+      }
+    },
+    {
       "name": "GlobalStateCreateInput",
       "type": {
         "kind": "struct",
@@ -745,6 +928,14 @@ export const IDL: ImpactNft = {
           {
             "name": "levels",
             "type": "u16"
+          },
+          {
+            "name": "fee",
+            "type": {
+              "option": {
+                "defined": "FeeConfig"
+              }
+            }
           }
         ]
       }
@@ -765,6 +956,14 @@ export const IDL: ImpactNft = {
           {
             "name": "levels",
             "type": "u16"
+          },
+          {
+            "name": "fee",
+            "type": {
+              "option": {
+                "defined": "FeeConfig"
+              }
+            }
           }
         ]
       }
@@ -811,6 +1010,34 @@ export const IDL: ImpactNft = {
           }
         ]
       }
+    },
+    {
+      "name": "FeeType",
+      "type": {
+        "kind": "enum",
+        "variants": [
+          {
+            "name": "Fixed"
+          },
+          {
+            "name": "Percentage"
+          }
+        ]
+      }
+    },
+    {
+      "name": "CoinType",
+      "type": {
+        "kind": "enum",
+        "variants": [
+          {
+            "name": "Native"
+          },
+          {
+            "name": "Spl"
+          }
+        ]
+      }
     }
   ],
   "errors": [
@@ -838,6 +1065,11 @@ export const IDL: ImpactNft = {
       "code": 6004,
       "name": "InvalidUpdateForMint",
       "msg": "Invalid update for mint"
+    },
+    {
+      "code": 6005,
+      "name": "InvalidFeeRecipient",
+      "msg": "Invalid fee recipient account"
     }
   ]
 };

@@ -1,32 +1,67 @@
 use anchor_lang::prelude::*;
 
+#[derive(AnchorSerialize, AnchorDeserialize, Clone)]
+pub enum FeeType {
+    Fixed,
+    Percentage,
+}
+
+#[derive(AnchorSerialize, AnchorDeserialize, Clone)]
+pub enum CoinType {
+    Native,
+    Spl,
+}
+
+#[derive(AnchorSerialize, AnchorDeserialize, Clone)]
+pub struct FeeConfig {
+    pub fee: u64, // if fee_type is Fixed, this is in lamports
+    // if fee_type is Percentage, this is in basis points (100bp = 1%)
+    pub recipient: Pubkey, // either a token account or a SOL address
+    pub fee_type: FeeType,
+    pub coin_type: CoinType,
+    pub spl_token_mint: Option<Pubkey>, // if recipient is a token account, this is the mint
+}
+impl FeeConfig {
+    pub const SPACE: usize = 8 + 32 + 1 + 1 + (1 + 32);
+}
+
 #[account]
 pub struct GlobalState {
     pub admin_authority: Pubkey, // Typically an EOA
     pub mint_authority: Pubkey,  // Typically a PDA
     // number of levels, can probably be capped at u8 or u16
     pub levels: u16,
+    pub fee: Option<FeeConfig>,
 }
 
 #[derive(AnchorSerialize, AnchorDeserialize, Clone)]
 pub struct GlobalStateCreateInput {
     pub mint_authority: Pubkey,
     pub levels: u16,
+    pub fee: Option<FeeConfig>,
 }
 #[derive(AnchorSerialize, AnchorDeserialize, Clone)]
 pub struct GlobalStateUpdateInput {
     pub admin_authority: Pubkey,
     pub mint_authority: Pubkey,
     pub levels: u16,
+    pub fee: Option<FeeConfig>,
 }
 
 impl GlobalState {
-    pub const SPACE: usize = 8 + 32 + 32 + 2;
+    pub const SPACE: usize = 8 + 32 + 32 + 2 + 1 + FeeConfig::SPACE;
 
-    pub fn set(&mut self, admin_authority: Pubkey, mint_authority: Pubkey, levels: u16) {
+    pub fn set(
+        &mut self,
+        admin_authority: Pubkey,
+        mint_authority: Pubkey,
+        levels: u16,
+        fee: Option<FeeConfig>,
+    ) {
         self.admin_authority = admin_authority;
         self.mint_authority = mint_authority;
         self.levels = levels;
+        self.fee = fee;
     }
 }
 

@@ -46,8 +46,8 @@ pub mod impact_nft {
         update_offset_tiers_handler(ctx, input)
     }
 
-    pub fn mint_nft(ctx: Context<MintNft>, offset_amount: u64) -> Result<()> {
-        mint_nft_handler(ctx, offset_amount)
+    pub fn mint_nft(ctx: Context<MintNft>, offset_amount: u64, principal: u64) -> Result<()> {
+        mint_nft_handler(ctx, offset_amount, principal)
     }
 
     pub fn update_nft(ctx: Context<UpdateNft>, offset_amount: u64) -> Result<()> {

@@ -25,6 +25,7 @@ pub fn create_global_state_handler(
         ctx.accounts.admin_authority.key(),
         state.mint_authority,
         state.levels,
+        state.fee,
     );
     Ok(())
 }
