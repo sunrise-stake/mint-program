@@ -137,8 +137,7 @@ impl OffsetTiers {
     }
 
     pub fn get_index_from_offset(&self, offset: u64) -> Option<usize> {
-        self
-            .levels
+        self.levels
             .iter()
             .rev()
             .position(|level| level.offset <= offset)

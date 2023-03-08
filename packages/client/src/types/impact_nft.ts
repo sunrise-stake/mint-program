@@ -235,27 +235,6 @@ export type ImpactNft = {
           "name": "rent",
           "isMut": false,
           "isSigner": false
-        },
-        {
-          "name": "payerTokenAccount",
-          "isMut": true,
-          "isSigner": false,
-          "isOptional": true
-        },
-        {
-          "name": "recipient",
-          "isMut": true,
-          "isSigner": false,
-          "isOptional": true,
-          "docs": [
-            "CHECK, can be anything as long as it matches the recipient in the fee config"
-          ]
-        },
-        {
-          "name": "recipientTokenAccount",
-          "isMut": true,
-          "isSigner": false,
-          "isOptional": true
         }
       ],
       "args": [
@@ -309,11 +288,6 @@ export type ImpactNft = {
         },
         {
           "name": "metadata",
-          "isMut": true,
-          "isSigner": false
-        },
-        {
-          "name": "tokenAccount",
           "isMut": true,
           "isSigner": false
         },
@@ -870,27 +844,6 @@ export const IDL: ImpactNft = {
           "name": "rent",
           "isMut": false,
           "isSigner": false
-        },
-        {
-          "name": "payerTokenAccount",
-          "isMut": true,
-          "isSigner": false,
-          "isOptional": true
-        },
-        {
-          "name": "recipient",
-          "isMut": true,
-          "isSigner": false,
-          "isOptional": true,
-          "docs": [
-            "CHECK, can be anything as long as it matches the recipient in the fee config"
-          ]
-        },
-        {
-          "name": "recipientTokenAccount",
-          "isMut": true,
-          "isSigner": false,
-          "isOptional": true
         }
       ],
       "args": [
@@ -944,11 +897,6 @@ export const IDL: ImpactNft = {
         },
         {
           "name": "metadata",
-          "isMut": true,
-          "isSigner": false
-        },
-        {
-          "name": "tokenAccount",
           "isMut": true,
           "isSigner": false
         },

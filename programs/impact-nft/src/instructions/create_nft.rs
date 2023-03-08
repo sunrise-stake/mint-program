@@ -1,12 +1,12 @@
 use crate::error::ErrorCode;
 use crate::seeds::{OFFSET_METADATA_SEED, OFFSET_TIERS_SEED, TOKEN_AUTHORITY_SEED};
-use crate::state::{CoinType, GlobalState, OffsetMetadata, OffsetTiers};
-use crate::utils::fee::handle_fees;
+use crate::state::{GlobalState, OffsetMetadata, OffsetTiers};
+// use crate::utils::fee::handle_fees;
 use crate::utils::metaplex::{create_master_edition_account, create_metadata_account, verify_nft};
 use crate::utils::token::{create_mint, create_token_account, mint_to};
 use anchor_lang::prelude::*;
 use anchor_spl::associated_token::AssociatedToken;
-use anchor_spl::token::{Token, TokenAccount};
+use anchor_spl::token::{Token};
 
 /// Permissionless. The required external verification
 /// is the admin_mint_authority
@@ -24,7 +24,8 @@ pub struct MintNft<'info> {
 
     #[account(
         has_one = admin_mint_authority @ ErrorCode::InvalidMintAuthority,
-        constraint =  global_state.fee.as_ref().and_then(|fee_config| fee_config.spl_token_mint) == payer_token_account.as_ref().map(|payer_token_account| payer_token_account.mint)
+    // RE-ENABLE ONCE FEES ARE SUPPORTED
+        // constraint =  global_state.fee.as_ref().and_then(|fee_config| fee_config.spl_token_mint) == payer_token_account.as_ref().map(|payer_token_account| payer_token_account.mint)
     // the fee config recipient must be either the recipient account or the recipient token account, depending on the coin type
     // checked in code as the constraint is too complex to put here
     )]
@@ -75,17 +76,18 @@ pub struct MintNft<'info> {
     pub token_metadata_program: UncheckedAccount<'info>,
     pub system_program: Program<'info, System>,
     pub rent: Sysvar<'info, Rent>,
-    #[account(mut)]
-    pub payer_token_account: Option<Box<Account<'info, TokenAccount>>>,
-    /// CHECK, can be anything as long as it matches the recipient in the fee config
-    #[account(mut)]
-    pub recipient: Option<UncheckedAccount<'info>>,
-    #[account(mut)]
-    pub recipient_token_account: Option<Box<Account<'info, TokenAccount>>>,
+    // disable fee payment until the client integration supports it
+    // #[account(mut)]
+    // pub payer_token_account: Option<Box<Account<'info, TokenAccount>>>,
+    // /// CHECK, can be anything as long as it matches the recipient in the fee config
+    // #[account(mut)]
+    // pub recipient: Option<UncheckedAccount<'info>>,
+    // #[account(mut)]
+    // pub recipient_token_account: Option<Box<Account<'info, TokenAccount>>>,
 }
 
 /** TODO: add offset update logic */
-pub fn mint_nft_handler(ctx: Context<MintNft>, offset_amount: u64, principal: u64) -> Result<()> {
+pub fn mint_nft_handler(ctx: Context<MintNft>, offset_amount: u64, _principal: u64) -> Result<()> {
     let mint = &ctx.accounts.mint;
     let token_authority = &ctx.accounts.token_authority;
     let payer = &ctx.accounts.payer;
@@ -104,32 +106,32 @@ pub fn mint_nft_handler(ctx: Context<MintNft>, offset_amount: u64, principal: u6
     }
 
     // ensure the fee recipient matches the fee config
-    match &ctx.accounts.global_state.fee {
-        Some(fee_config) => match fee_config.coin_type {
-            CoinType::Spl => {
-                require_keys_eq!(
-                    fee_config.recipient,
-                    ctx.accounts.recipient_token_account.as_ref().unwrap().key()
-                );
-            }
-            CoinType::Native => {
-                require_keys_eq!(
-                    fee_config.recipient,
-                    ctx.accounts.recipient.as_ref().unwrap().key()
-                );
-            }
-        },
-        None => {
-            require!(
-                ctx.accounts.recipient_token_account.is_none(),
-                ErrorCode::InvalidFeeRecipient
-            );
-            require!(
-                ctx.accounts.recipient.is_none(),
-                ErrorCode::InvalidFeeRecipient
-            );
-        }
-    }
+    // match &ctx.accounts.global_state.fee {
+    //     Some(fee_config) => match fee_config.coin_type {
+    //         CoinType::Spl => {
+    //             require_keys_eq!(
+    //                 fee_config.recipient,
+    //                 ctx.accounts.recipient_token_account.as_ref().unwrap().key()
+    //             );
+    //         }
+    //         CoinType::Native => {
+    //             require_keys_eq!(
+    //                 fee_config.recipient,
+    //                 ctx.accounts.recipient.as_ref().unwrap().key()
+    //             );
+    //         }
+    //     },
+    //     None => {
+    //         require!(
+    //             ctx.accounts.recipient_token_account.is_none(),
+    //             ErrorCode::InvalidFeeRecipient
+    //         );
+    //         require!(
+    //             ctx.accounts.recipient.is_none(),
+    //             ErrorCode::InvalidFeeRecipient
+    //         );
+    //     }
+    // }
 
     msg!("creating mint");
     create_mint(
@@ -189,30 +191,31 @@ pub fn mint_nft_handler(ctx: Context<MintNft>, offset_amount: u64, principal: u6
         token_authority_bump,
     )?;
 
-    if let Some(fee_config) = &ctx.accounts.global_state.fee {
-        let recipient: AccountInfo = ctx.accounts.recipient.as_ref().map_or_else(
-            || {
-                ctx.accounts
-                    .recipient_token_account
-                    .as_ref()
-                    .unwrap()
-                    .to_account_info()
-            },
-            |a| a.to_account_info(),
-        );
-        let fee_payer_token_account = ctx
-            .accounts
-            .payer_token_account
-            .as_ref()
-            .map(|a| a.to_account_info());
-        handle_fees(
-            token_program,
-            fee_config,
-            &ctx.accounts.payer,
-            fee_payer_token_account,
-            &recipient,
-            principal,
-        )?;
+    if let Some(_fee_config) = &ctx.accounts.global_state.fee {
+        msg!("Fee config is set but fees are currently disabled");
+        // let recipient: AccountInfo = ctx.accounts.recipient.as_ref().map_or_else(
+        //     || {
+        //         ctx.accounts
+        //             .recipient_token_account
+        //             .as_ref()
+        //             .unwrap()
+        //             .to_account_info()
+        //     },
+        //     |a| a.to_account_info(),
+        // );
+        // let fee_payer_token_account = ctx
+        //     .accounts
+        //     .payer_token_account
+        //     .as_ref()
+        //     .map(|a| a.to_account_info());
+        // handle_fees(
+        //     token_program,
+        //     fee_config,
+        //     &ctx.accounts.payer,
+        //     fee_payer_token_account,
+        //     &recipient,
+        //     principal,
+        // )?;
     }
 
     ctx.accounts

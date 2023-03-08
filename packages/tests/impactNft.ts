@@ -215,7 +215,8 @@ describe("impact-nft", () => {
       );
     });
 
-    it("Can mint an nft and charge a fee", async () => {
+    // re-enable once fees are supported
+    it.skip("Can mint an nft and charge a fee", async () => {
       await client.mintNft(mint, mintAuthority, user.publicKey, initialOffset, principal);
 
       // check if the fee was paid
