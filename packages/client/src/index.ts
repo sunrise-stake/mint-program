@@ -4,6 +4,8 @@ import { PublicKey, Keypair, SystemProgram, Connection, ComputeBudgetProgram } f
 import { ImpactNft, IDL } from "./types/impact_nft";
 import {ASSOCIATED_TOKEN_PROGRAM_ID, getAssociatedTokenAddressSync, TOKEN_PROGRAM_ID} from "@solana/spl-token";
 import BN from "bn.js";
+import {Metaplex} from "@metaplex-foundation/js";
+import {createMetaplexInstance} from "../../tests/util";
 
 const TOKEN_METADATA_PROGRAM_ID = new PublicKey(
     "metaqbxxUerdq28cj1RbAWkYQm3ybzjb6a8bt518x1s"
@@ -82,8 +84,11 @@ export class ImpactNftClient {
   readonly program: Program<ImpactNft>;
   stateAddress: PublicKey | undefined;
 
+  readonly metaplex: Metaplex;
+
   private constructor(readonly provider: AnchorProvider) {
     this.program = new Program<ImpactNft>(IDL, PROGRAM_ID, provider);
+    this.metaplex = createMetaplexInstance(provider.connection);
   }
 
   public static async register(
@@ -203,6 +208,29 @@ export class ImpactNftClient {
         TOKEN_METADATA_PROGRAM_ID
     )[0];
   }
+
+  public async createCollectionMint(
+      uri: string,
+      name: string,
+  ): Promise<Keypair> {
+    if (!this.config) throw new Error("Client not initialized");
+    const mint = Keypair.generate();
+
+    const { nft } = await this.metaplex.nfts().create({
+      uri,
+      name,
+      sellerFeeBasisPoints: 100,
+      useNewMint: mint,
+      isCollection: true,
+    });
+
+    await this.metaplex.nfts().update({
+      nftOrSft: nft,
+      newUpdateAuthority: this.config.tokenAuthority,
+    });
+
+    return mint;
+  };
 
   public async registerOffsetTiers(levels: Level[]) {
     if (!this.stateAddress) throw new Error("Client not initialized");

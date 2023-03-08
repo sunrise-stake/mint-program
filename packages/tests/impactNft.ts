@@ -26,25 +26,19 @@ const mintAuthority = Keypair.generate();
 
 const makeLevels = async (client: ImpactNftClient) => {
   const metadata = getTestMetadata();
-  const metaplex = createMetaplexInstance(client.provider.connection);
 
-  const mint1 = await initializeTestCollection(
-      metaplex,
+  const mint1 = await client.createCollectionMint(
       metadata[0],
       "sunriseStake0Collection",
-      client.config.tokenAuthority
-  );
-  const mint2 = await initializeTestCollection(
-      metaplex,
+  )
+
+  const mint2 = await client.createCollectionMint(
       metadata[1],
       "sunriseStake1Collection",
-      client.config.tokenAuthority
   );
-  const mint3 = await initializeTestCollection(
-      metaplex,
+  const mint3 = await client.createCollectionMint(
       metadata[2],
       "sunriseStake2Collection",
-      client.config.tokenAuthority
   );
 
   const level0: Level = {
@@ -159,7 +153,6 @@ describe("impact-nft", () => {
       .accounts({
         ...accounts,
         ...updateAccounts,
-        tokenAccount: accounts.userTokenAccount,
         globalState: client.stateAddress,
         mint: mint.publicKey,
         tokenProgram: TOKEN_PROGRAM_ID,
