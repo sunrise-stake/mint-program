@@ -25,10 +25,18 @@ impl FeeConfig {
     pub const SPACE: usize = 8 + 32 + 1 + 1 + (1 + 32);
 }
 
+/*
+Contains both the admin_update_authority and the admin_mint_authority
+for future comparison and verification. Both are external authorities
+and at least one is needed for any instruction. The distinction is so
+that authority privileges are shared between a signer for permissionless
+ixs that can be an external program's PDA, and a signer for permissioned
+ixs that don't need to go through the calling program.
+*/
 #[account]
 pub struct GlobalState {
-    pub admin_authority: Pubkey, // Typically an EOA
-    pub mint_authority: Pubkey,  // Typically a PDA
+    pub admin_update_authority: Pubkey, // Typically an EOA
+    pub admin_mint_authority: Pubkey,   // Typically a PDA
     // number of levels, can probably be capped at u8 or u16
     pub levels: u16,
     pub fee: Option<FeeConfig>,
@@ -36,14 +44,14 @@ pub struct GlobalState {
 
 #[derive(AnchorSerialize, AnchorDeserialize, Clone)]
 pub struct GlobalStateCreateInput {
-    pub mint_authority: Pubkey,
+    pub admin_mint_authority: Pubkey,
     pub levels: u16,
     pub fee: Option<FeeConfig>,
 }
 #[derive(AnchorSerialize, AnchorDeserialize, Clone)]
 pub struct GlobalStateUpdateInput {
-    pub admin_authority: Pubkey,
-    pub mint_authority: Pubkey,
+    pub admin_update_authority: Pubkey,
+    pub admin_mint_authority: Pubkey,
     pub levels: u16,
     pub fee: Option<FeeConfig>,
 }
@@ -53,13 +61,13 @@ impl GlobalState {
 
     pub fn set(
         &mut self,
-        admin_authority: Pubkey,
-        mint_authority: Pubkey,
+        admin_update_authority: Pubkey,
+        admin_mint_authority: Pubkey,
         levels: u16,
         fee: Option<FeeConfig>,
     ) {
-        self.admin_authority = admin_authority;
-        self.mint_authority = mint_authority;
+        self.admin_update_authority = admin_update_authority;
+        self.admin_mint_authority = admin_mint_authority;
         self.levels = levels;
         self.fee = fee;
     }
@@ -68,17 +76,17 @@ impl GlobalState {
 /**
  * The Level struct is used to store the offset tiers.
  */
-#[derive(AnchorSerialize, AnchorDeserialize, Clone, Debug)]
+#[derive(AnchorSerialize, AnchorDeserialize, Clone, Debug, PartialEq)]
 pub struct Level {
-    pub offset: u64,    // 8
-    pub uri: String,    // 200
-    pub name: String,   // 30
-    pub symbol: String, // 10
+    pub offset: u64,
+    pub uri: String,    //mplx limit of 200
+    pub name: String,   //mplx limit of 32
+    pub symbol: String, //mplx limit of 10
+    pub collection_mint: Pubkey,
 }
-//TODO: need a way to enforce that neither name nor symbol exceeds their bounds
 
 impl Level {
-    pub const SPACE: usize = 8 + 200 + 30 + 15;
+    pub const SPACE: usize = 8 + (4 + 200) + (4 + 32) + (4 + 10) + 15 + 32;
 }
 
 #[account]
@@ -94,9 +102,10 @@ pub struct OffsetTiersInput {
 }
 
 impl OffsetTiers {
+    pub const MAX_LEVELS: usize = 10;
     /** Allocate up to 10 levels (can be modified) */
     pub const SPACE: usize = 4   // vec
-        + (Level::SPACE * 10)    // 10 levels
+        + (Level::SPACE * Self::MAX_LEVELS)
         + 1                      // bump
         + 8; // discriminator
 
@@ -105,15 +114,9 @@ impl OffsetTiers {
     }
 
     pub fn get_level(&self, offset: u64) -> Option<&Level> {
-        let level_index = match self
-            .levels
-            .iter()
-            .rev()
-            .position(|level| level.offset <= offset)
-        {
-            Some(i) => self.levels.len() - 1 - i,
-            None => 0,
-        };
+        // Defaults to zero if level doesn't exist for offset.
+        let level_index = self.get_index_from_offset(offset).unwrap_or(0);
+
         msg!(
             "Level for offset {} is {} (starts at {})",
             offset,
@@ -132,23 +135,38 @@ impl OffsetTiers {
 
         Some(&self.levels[level_index])
     }
+
+    pub fn get_index_from_offset(&self, offset: u64) -> Option<usize> {
+        self
+            .levels
+            .iter()
+            .rev()
+            .position(|level| level.offset <= offset)
+            .map(|i| self.levels.len() - 1 - i)
+    }
 }
 
 #[account]
 pub struct OffsetMetadata {
+    pub current_level_index: u16,
     pub offset: u64,
     pub bump: u8,
 }
 
 impl OffsetMetadata {
-    pub const SPACE: usize = 8 + 8 + 1;
-
-    pub fn set(&mut self, offset: u64, bump: u8) {
-        self.set_amount(offset);
-        self.bump = bump;
-    }
+    pub const SPACE: usize = 8 + 2 + 8 + 1;
 
     pub fn set_amount(&mut self, offset: u64) {
         self.offset = offset;
+    }
+
+    pub fn set_level_index(&mut self, index: usize) {
+        self.current_level_index = index as u16;
+    }
+
+    pub fn set(&mut self, offset: u64, bump: u8, level_index: usize) {
+        self.set_amount(offset);
+        self.bump = bump;
+        self.set_level_index(level_index);
     }
 }

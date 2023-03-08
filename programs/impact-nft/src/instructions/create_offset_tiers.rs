@@ -2,15 +2,15 @@ use crate::seeds::OFFSET_TIERS_SEED;
 use crate::state::{GlobalState, OffsetTiers, OffsetTiersInput};
 use anchor_lang::prelude::*;
 
+/// Permissioned. The required external verification is
+/// the admin_update_authority
 #[derive(Accounts, Clone)]
 #[instruction(state: OffsetTiersInput)]
 pub struct CreateOffsetTiers<'info> {
-    pub admin_authority: Signer<'info>,
+    pub admin_update_authority: Signer<'info>,
     #[account(mut)]
     pub payer: Signer<'info>,
-    #[account(
-        has_one = admin_authority
-    )]
+    #[account( has_one = admin_update_authority )]
     pub global_state: Account<'info, GlobalState>,
     #[account(
         init,

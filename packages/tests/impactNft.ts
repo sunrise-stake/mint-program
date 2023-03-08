@@ -9,37 +9,67 @@ import {
   LAMPORTS_PER_SOL,
   PublicKey,
 } from "@solana/web3.js";
-import { getTestMetadata } from "./util";
 import { assert } from "chai";
+import { TOKEN_PROGRAM_ID } from "@solana/spl-token";
+import { Level } from "../client/src";
+import {
+  createMetaplexInstance,
+  initializeTestCollection,
+  getTestMetadata,
+} from "./util";
 
 const program = anchor.workspace.ImpactNft as Program<ImpactNft>;
-// This would typically be a PDA onwed by a different program
+
+// This would typically be a PDA owned by a different program
 // e.g. the sunrise program
 const mintAuthority = Keypair.generate();
 
-const makeLevels = () => {
-  const meta = getTestMetadata();
+const makeLevels = async (client: ImpactNftClient) => {
+  const metadata = getTestMetadata();
+  const metaplex = createMetaplexInstance(client.provider.connection);
 
-  const level1 = {
+  const mint1 = await initializeTestCollection(
+      metaplex,
+      metadata[0],
+      "sunriseStake0Collection",
+      client.config.tokenAuthority
+  );
+  const mint2 = await initializeTestCollection(
+      metaplex,
+      metadata[1],
+      "sunriseStake1Collection",
+      client.config.tokenAuthority
+  );
+  const mint3 = await initializeTestCollection(
+      metaplex,
+      metadata[2],
+      "sunriseStake2Collection",
+      client.config.tokenAuthority
+  );
+
+  const level0: Level = {
     offset: new BN(100), // tier 0 limit
-    uri: meta[0],
+    uri: metadata[0],
     name: "sunriseStake0",
     symbol: "sun0",
+    collectionMint: mint1.publicKey,
   };
-  const level2 = {
+  const level1 = {
     offset: new BN(200), // tier 1 limit
-    uri: meta[1],
+    uri: metadata[1],
     name: "sunriseStake1",
     symbol: "sun1",
+    collectionMint: mint2.publicKey,
   };
-  const level3 = {
+  const level2 = {
     offset: new BN(300), // tier 2 limit
-    uri: meta[2],
+    uri: metadata[2],
     name: "sunriseStake2",
     symbol: "sun2",
+    collectionMint: mint3.publicKey,
   };
 
-  return [level1, level2, level3];
+  return [level0, level1, level2];
 }
 
 describe("impact-nft", () => {
@@ -57,9 +87,11 @@ describe("impact-nft", () => {
 
   const principal = new BN(100); // used to calculate the fee
   const initialOffset = new BN(140); // should still default to a level0 nft
-  const updatedOffset = new BN(180); // should upgrade to a level1 nft
+  const updatedOffset = new BN(220); // should upgrade to a level1 nft
 
   const mint = Keypair.generate();
+
+  let levels: Array<Level>;
 
   it("Can register a new global state without fees", async () => {
     const levels = 3;
@@ -70,10 +102,10 @@ describe("impact-nft", () => {
     stateAddress = client.stateAddress as PublicKey;
 
     const state = await program.account.globalState.fetch(stateAddress);
-    expect(state.mintAuthority.toBase58()).equal(
+    expect(state.adminMintAuthority.toBase58()).equal(
       mintAuthority.publicKey.toBase58()
     );
-    expect(state.adminAuthority.toBase58()).equal(
+    expect(state.adminUpdateAuthority.toBase58()).equal(
       client.provider.publicKey.toBase58()
     );
     expect(state.levels).equal(levels);
@@ -81,14 +113,12 @@ describe("impact-nft", () => {
   });
 
   it("Can create offset tiers", async () => {
-    const levels = makeLevels();
+    const levels = await makeLevels(client);
     await client.registerOffsetTiers(levels);
 
-    const offsetTiersAddress = client.getOffsetTiersAddress(
-      client.stateAddress
-    );
+    const offsetTiersAddress = client.getOffsetTiersAddress();
 
-    let tiers = await program.account.offsetTiers.fetch(offsetTiersAddress);
+    const tiers = await program.account.offsetTiers.fetch(offsetTiersAddress);
 
     assert((tiers.levels[0].offset as BN).eq(levels[0].offset));
     assert((tiers.levels[1].offset as BN).eq(levels[1].offset));
@@ -118,16 +148,21 @@ describe("impact-nft", () => {
   });
 
   it("can update an nft", async () => {
-    let accounts = client.getMintNftAccounts(mint.publicKey, user.publicKey);
-
-
+    const accounts = client.getMintNftAccounts(mint.publicKey, user.publicKey);
+    const updateAccounts = await client.getUpdateNftAccounts(
+      mint.publicKey,
+      updatedOffset
+    );
 
     await program.methods
       .updateNft(updatedOffset)
       .accounts({
         ...accounts,
+        ...updateAccounts,
+        tokenAccount: accounts.userTokenAccount,
         globalState: client.stateAddress,
         mint: mint.publicKey,
+        tokenProgram: TOKEN_PROGRAM_ID,
       })
       .signers([mintAuthority])
       .rpc();
@@ -160,7 +195,7 @@ describe("impact-nft", () => {
     });
 
     it("Can register a new global state with SOL fees", async () => {
-      const levels = makeLevels();
+      const levels = await makeLevels(client);
       const feeConfig = {
         fee: feeBasisPoints,
         recipient: feeRecipient.publicKey,

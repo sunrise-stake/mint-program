@@ -1,3 +1,4 @@
+use crate::seeds::TOKEN_AUTHORITY_SEED;
 use anchor_lang::prelude::*;
 use anchor_lang::solana_program::program::invoke;
 use anchor_lang::solana_program::system_instruction::create_account;
@@ -7,10 +8,10 @@ use anchor_spl::token::{self, Token};
 pub fn create_mint<'a>(
     payer: &AccountInfo<'a>,
     mint: &AccountInfo<'a>,
-    mint_authority: &AccountInfo<'a>,
     system_program: &Program<'a, System>,
     token_program: &Program<'a, token::Token>,
     rent_sysvar: &AccountInfo<'a>,
+    token_authority: &AccountInfo<'a>,
 ) -> Result<()> {
     let rent = Rent::get()?;
     let lamports = rent.minimum_balance(token::Mint::LEN);
@@ -34,24 +35,33 @@ pub fn create_mint<'a>(
         rent: rent_sysvar.clone(),
     };
     let cpi_ctx = CpiContext::new(token_program.to_account_info(), accounts);
-    token::initialize_mint(cpi_ctx, 0, mint_authority.key, Some(mint_authority.key))
+    token::initialize_mint(cpi_ctx, 0, token_authority.key, Some(token_authority.key))
 }
 
 pub fn mint_to<'a>(
     token_program: &Program<'a, token::Token>,
     mint: &AccountInfo<'a>,
-    mint_authority: &AccountInfo<'a>,
     token_account: &AccountInfo<'a>,
+    global_state: &Pubkey,
+    token_authority: &AccountInfo<'a>,
+    token_authority_bump: u8,
 ) -> Result<()> {
     msg!("Minting nft");
+    let token_auth_seeds = &[
+        TOKEN_AUTHORITY_SEED,
+        global_state.as_ref(),
+        &[token_authority_bump],
+    ];
+
     token::mint_to(
-        CpiContext::new(
+        CpiContext::new_with_signer(
             token_program.to_account_info(),
             token::MintTo {
                 mint: mint.to_account_info(),
                 to: token_account.to_account_info(),
-                authority: mint_authority.to_account_info(),
+                authority: token_authority.to_account_info(),
             },
+            &[&token_auth_seeds[..]],
         ),
         1,
     )?;
