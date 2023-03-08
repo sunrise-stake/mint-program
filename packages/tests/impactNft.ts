@@ -131,7 +131,7 @@ describe("impact-nft", () => {
 
   it("can mint an nft and update its offset", async () => {
     await client.mintNft(mint, mintAuthority, user.publicKey, initialOffset, principal);
-    const mintNftAccounts = client.getMintNftAccounts(
+    const mintNftAccounts = await client.getMintNftAccounts(
       mint.publicKey,
       user.publicKey
     );
@@ -148,7 +148,7 @@ describe("impact-nft", () => {
   });
 
   it("can update an nft", async () => {
-    const accounts = client.getMintNftAccounts(mint.publicKey, user.publicKey);
+    const accounts = await client.getMintNftAccounts(mint.publicKey, user.publicKey);
     const updateAccounts = await client.getUpdateNftAccounts(
       mint.publicKey,
       updatedOffset
