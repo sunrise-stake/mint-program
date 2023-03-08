@@ -12,11 +12,7 @@ import {
 import { assert } from "chai";
 import { TOKEN_PROGRAM_ID } from "@solana/spl-token";
 import { Level } from "../client/src";
-import {
-  createMetaplexInstance,
-  initializeTestCollection,
-  getTestMetadata,
-} from "./util";
+import { getTestMetadata, } from "./util";
 
 const program = anchor.workspace.ImpactNft as Program<ImpactNft>;
 
@@ -84,8 +80,6 @@ describe("impact-nft", () => {
   const updatedOffset = new BN(220); // should upgrade to a level1 nft
 
   const mint = Keypair.generate();
-
-  let levels: Array<Level>;
 
   it("Can register a new global state without fees", async () => {
     const levels = 3;

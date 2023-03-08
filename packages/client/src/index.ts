@@ -4,8 +4,7 @@ import { PublicKey, Keypair, SystemProgram, Connection, ComputeBudgetProgram } f
 import { ImpactNft, IDL } from "./types/impact_nft";
 import {ASSOCIATED_TOKEN_PROGRAM_ID, getAssociatedTokenAddressSync, TOKEN_PROGRAM_ID} from "@solana/spl-token";
 import BN from "bn.js";
-import {Metaplex} from "@metaplex-foundation/js";
-import {createMetaplexInstance} from "../../tests/util";
+import {keypairIdentity, Metaplex, walletAdapterIdentity} from "@metaplex-foundation/js";
 
 const TOKEN_METADATA_PROGRAM_ID = new PublicKey(
     "metaqbxxUerdq28cj1RbAWkYQm3ybzjb6a8bt518x1s"
@@ -88,7 +87,7 @@ export class ImpactNftClient {
 
   private constructor(readonly provider: AnchorProvider) {
     this.program = new Program<ImpactNft>(IDL, PROGRAM_ID, provider);
-    this.metaplex = createMetaplexInstance(provider.connection);
+    this.metaplex = Metaplex.make(provider.connection).use(walletAdapterIdentity(provider.wallet));
   }
 
   public static async register(
