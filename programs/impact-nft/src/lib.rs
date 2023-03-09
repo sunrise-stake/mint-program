@@ -46,6 +46,10 @@ pub mod impact_nft {
         update_offset_tiers_handler(ctx, input)
     }
 
+    pub fn add_levels(ctx: Context<AddLevels>, input: Vec<Level>) -> Result<()> {
+        add_level_handler(ctx, input)
+    }
+
     pub fn mint_nft(ctx: Context<MintNft>, offset_amount: u64, principal: u64) -> Result<()> {
         mint_nft_handler(ctx, offset_amount, principal)
     }
