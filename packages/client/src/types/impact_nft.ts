@@ -254,7 +254,7 @@ export type ImpactNft = {
         },
         {
           "name": "adminMintAuthority",
-          "isMut": true,
+          "isMut": false,
           "isSigner": true
         },
         {
@@ -773,7 +773,7 @@ export const IDL: ImpactNft = {
         },
         {
           "name": "adminMintAuthority",
-          "isMut": true,
+          "isMut": false,
           "isSigner": true
         },
         {

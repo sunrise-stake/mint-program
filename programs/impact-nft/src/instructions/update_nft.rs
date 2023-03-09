@@ -13,8 +13,7 @@ use anchor_spl::token::{ Mint, Token, TokenAccount };
 pub struct UpdateNft<'info> {
     #[account(mut)]
     pub payer: Signer<'info>,
-
-    #[account(mut)] // needed for verify ix
+    // needed for verify ix
     pub admin_mint_authority: Signer<'info>,
     /// CHECK: Verified with function
     #[account(
