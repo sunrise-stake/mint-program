@@ -134,8 +134,11 @@ export class ImpactNftClient {
       .rpc()
       .then(() => confirm(client.provider.connection));
 
+    console.log("Created global state", state.publicKey.toBase58());
+    console.log("initialising...")
     await client.init(state.publicKey);
 
+    console.log("initialised")
     return client;
   }
 

@@ -11,7 +11,6 @@ const mintAuthority = new PublicKey(process.argv[2]);
 (async () => {
   console.log("Registering impact nft state...");
   const client = await ImpactNftClient.register(mintAuthority, meta.length);
-
   console.log("State address: " + client.stateAddress);
 
   console.log("Creating collection mints...");
@@ -20,7 +19,7 @@ const mintAuthority = new PublicKey(process.argv[2]);
       console.log(`Creating collection for level ${i}...`);
       const mint = await client.createCollectionMint(
         uri,
-        `Sunrise Stake Impact NFT Collection Level ${i}`
+        `Sunrise Impact Collection ${i}`
       );
       return {
         offset: new BN(offset),
@@ -32,7 +31,7 @@ const mintAuthority = new PublicKey(process.argv[2]);
     })
   );
 
-  console.log("Registering offset tiers...");
+  console.log("Registering offset tiers...", levels);
   await client.registerOffsetTiers(levels);
   console.log("Done! State address: " + client.stateAddress);
 })();
