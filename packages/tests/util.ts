@@ -9,8 +9,7 @@ export const createMetaplexInstance = (connection: Connection): Metaplex => {
   const secretKey = Buffer.from(JSON.parse(walletString));
   const keypair = Keypair.fromSecretKey(secretKey);
 
-  const metaplex = Metaplex.make(connection).use(keypairIdentity(keypair));
-  return metaplex;
+  return Metaplex.make(connection).use(keypairIdentity(keypair));
 };
 
 export const initializeTestCollection = async (

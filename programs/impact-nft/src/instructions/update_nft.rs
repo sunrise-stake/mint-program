@@ -1,11 +1,9 @@
 use crate::error::ErrorCode;
 use crate::seeds::{OFFSET_METADATA_SEED, OFFSET_TIERS_SEED, TOKEN_AUTHORITY_SEED};
 use crate::state::{GlobalState, OffsetMetadata, OffsetTiers};
-use crate::utils::metaplex::{
-    check_metadata_account, unverify_nft, update_metadata, verify_nft
-};
+use crate::utils::metaplex::{check_metadata_account, unverify_nft, update_metadata, verify_nft};
 use anchor_lang::prelude::*;
-use anchor_spl::token::{ Mint, Token, TokenAccount };
+use anchor_spl::token::{Mint, Token};
 
 /// Permissionless. Requires the external admin_mint_authority
 #[derive(Accounts)]
@@ -46,8 +44,6 @@ pub struct UpdateNft<'info> {
         constraint = check_metadata_account(&metadata, &mint.to_account_info()),
     )]
     pub metadata: UncheckedAccount<'info>,
-    #[account(mut)]
-    pub token_account: Account<'info, TokenAccount>,
 
     // todo: Move to instruction?
     #[account(address = new_collection(&offset_tiers, offset_amount))]
@@ -84,10 +80,7 @@ fn current_collection<'a>(
     offset_tiers.levels[index as usize].collection_mint
 }
 
-fn new_collection(
-    offset_tiers: &Account<'_, OffsetTiers>, 
-    offset_amount: u64
-) -> Pubkey {
+fn new_collection(offset_tiers: &Account<'_, OffsetTiers>, offset_amount: u64) -> Pubkey {
     offset_tiers
         .get_level(offset_amount)
         .unwrap()
