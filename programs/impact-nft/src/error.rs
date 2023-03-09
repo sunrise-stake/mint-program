@@ -12,4 +12,6 @@ pub enum ErrorCode {
     NoOffsetTiers,
     #[msg("Invalid update for mint")]
     InvalidUpdateForMint,
+    #[msg("Invalid fee recipient account")]
+    InvalidFeeRecipient,
 }

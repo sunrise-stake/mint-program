@@ -258,9 +258,6 @@ pub fn update_metadata<'a>(
     Ok(())
 }
 
-
-
-
 /// Helper function that affirms that the metadata originates
 /// from this program instance. It does this by comparison with
 /// the mint which itself is validated by its unique offset_metadata
