@@ -81,7 +81,10 @@ export class ImpactNftClient {
     return client;
   }
 
-  public static async get(provider: AnchorProvider, stateAddress: PublicKey): Promise<ImpactNftClient> {
+  public static async get(
+    provider: AnchorProvider,
+    stateAddress: PublicKey
+  ): Promise<ImpactNftClient> {
     const client = new ImpactNftClient(provider);
     await client.init(stateAddress);
     return client;
@@ -104,17 +107,19 @@ export class ImpactNftClient {
   public async details() {
     if (!this.stateAddress) throw new Error("not initialized");
 
-    const state = await this.program.account.globalState.fetch(this.stateAddress);
+    const state = await this.program.account.globalState.fetch(
+      this.stateAddress
+    );
 
     const tiersAddress = this.getOffsetTiersAddress(this.stateAddress);
     const tiers = await this.program.account.offsetTiers.fetch(tiersAddress);
 
     return {
-        state,
-        tiers
-    }
+      state,
+      tiers,
+    };
   }
-  
+
   public getTokenAuthorityAddress(state: PublicKey): PublicKey {
     return PublicKey.findProgramAddressSync(
       [Buffer.from("token_authority"), state.toBuffer()],
@@ -245,7 +250,9 @@ export class ImpactNftClient {
     const collectionMasterEdition =
       this.getMasterEditionAddress(collectionMint);
 
-    const newCollectionMint = await this.getNewCollectionForOffset(offset);
+    const newCollectionMint = await this.getUpdateCollectionForOffset(offset);
+    if (newCollectionMint === null)
+      throw new Error("No levels in offset tiers");
     const newCollectionMetadata = this.getMetadataAddress(newCollectionMint);
     const newCollectionMasterEdition =
       this.getMasterEditionAddress(newCollectionMint);
@@ -279,29 +286,33 @@ export class ImpactNftClient {
     return levels[index].collectionMint;
   }
 
-  // Mirrors OffsetTiers.get_level() in program
-  private async getNewCollectionForOffset(
-    offsetAmount: anchor.BN
-  ): Promise<PublicKey> {
-    if (!this.stateAddress) throw new Error("Client not initialized");
+  // Mirrors offsetTiers.getLevel()
+  private async getUpdateCollectionForOffset(
+    offset: anchor.BN
+  ): Promise<PublicKey | null> {
+    if (this.stateAddress === undefined)
+      throw new Error("Client not initialized");
 
     let offsetTiers = this.getOffsetTiersAddress(this.stateAddress);
     let levels = (await this.program.account.offsetTiers
       .fetch(offsetTiers)
       .then((res) => res.levels)) as Level[];
 
-    let index = 0;
+    if (levels.length === 0) {
+      return null;
+    }
 
-    for (let i = 0; i < levels.length; i++) {
-      if (levels[i].offset > offsetAmount) {
-        index = i;
-        break;
+    if (levels.length === 1) {
+      return levels[0].collectionMint;
+    }
+
+    for (let i = 0; i < levels.length; ++i) {
+      if (levels[i].offset.gt(offset)) {
+        return levels[i - 1].collectionMint;
       }
     }
 
-    if (index != 0) {
-      return levels[index - 1].collectionMint;
-    }
-    return levels[0].collectionMint;
+    // return max offset
+    return levels[levels.length - 1].collectionMint;
   }
 }

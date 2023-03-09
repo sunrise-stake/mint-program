@@ -13,7 +13,6 @@ use anchor_spl::token::Token;
 pub struct MintNft<'info> {
     #[account(mut)]
     pub payer: Signer<'info>,
-
     pub admin_mint_authority: Signer<'info>,
     #[account(
         seeds = [TOKEN_AUTHORITY_SEED, global_state.key().as_ref()],
