@@ -6,7 +6,7 @@ use crate::utils::metaplex::{create_master_edition_account, create_metadata_acco
 use crate::utils::token::{create_mint, create_token_account, mint_to};
 use anchor_lang::prelude::*;
 use anchor_spl::associated_token::AssociatedToken;
-use anchor_spl::token::{Token};
+use anchor_spl::token::Token;
 
 /// Permissionless. The required external verification
 /// is the admin_mint_authority

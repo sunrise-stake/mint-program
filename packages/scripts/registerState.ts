@@ -1,6 +1,6 @@
 import { ImpactNftClient } from "../client/src";
 import { PublicKey } from "@solana/web3.js";
-import meta from "./impactNFTLevels.json"
+import meta from "./impactNFTLevels.json";
 import BN from "bn.js";
 
 // USAGE
@@ -9,28 +9,29 @@ import BN from "bn.js";
 const mintAuthority = new PublicKey(process.argv[2]);
 
 (async () => {
-  console.log("Registering impact nft state...")
+  console.log("Registering impact nft state...");
   const client = await ImpactNftClient.register(mintAuthority, meta.length);
-  console.log("State address: " + client.stateAddress)
+  console.log("State address: " + client.stateAddress);
 
-    console.log("Creating collection mints...")
-  const levels = await Promise.all(meta.map(async ({uri, name, symbol, offset}, i) => {
-    console.log(`Creating collection for level ${i}...`)
-    const mint = await client.createCollectionMint(
+  console.log("Creating collection mints...");
+  const levels = await Promise.all(
+    meta.map(async ({ uri, name, symbol, offset }, i) => {
+      console.log(`Creating collection for level ${i}...`);
+      const mint = await client.createCollectionMint(
         uri,
-        `Sunrise Impact Collection ${i}`,
-    )
-    return ({
-      offset: new BN(offset),
-      uri,
-      name,
-      symbol,
-      collectionMint: mint.publicKey
-    });
-  }));
+        `Sunrise Impact Collection ${i}`
+      );
+      return {
+        offset: new BN(offset),
+        uri,
+        name,
+        symbol,
+        collectionMint: mint.publicKey,
+      };
+    })
+  );
 
-
-  console.log("Registering offset tiers...", levels)
-  await client.registerOffsetTiers(levels)
-  console.log("Done! State address: " + client.stateAddress)
+  console.log("Registering offset tiers...", levels);
+  await client.registerOffsetTiers(levels);
+  console.log("Done! State address: " + client.stateAddress);
 })();
