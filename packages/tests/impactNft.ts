@@ -1,13 +1,11 @@
 import * as anchor from "@coral-xyz/anchor";
 import { Program } from "@coral-xyz/anchor";
 import { ImpactNft } from "../client/src/types/impact_nft";
-import { expect } from "chai";
+import { expect, assert } from "chai";
 import BN from "bn.js";
-import { ImpactNftClient } from "../client/src";
+import { ImpactNftClient, Level } from "../client/src";
 import { Keypair, LAMPORTS_PER_SOL, PublicKey } from "@solana/web3.js";
-import { assert } from "chai";
 import { TOKEN_PROGRAM_ID } from "@solana/spl-token";
-import { Level } from "../client/src";
 import { getTestMetadata } from "./util";
 
 const program = anchor.workspace.ImpactNft as Program<ImpactNft>;

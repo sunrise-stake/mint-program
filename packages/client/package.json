@@ -1,6 +1,6 @@
 {
   "name": "@sunrisestake/impact-nft-client",
-  "version": "0.0.1-alpha.9",
+  "version": "0.0.1-alpha.10",
   "license": "MIT",
   "main": "dist/index.js",
   "module": "dist/index.js",
@@ -14,6 +14,7 @@
   ],
   "dependencies": {
     "@coral-xyz/anchor": "^0.26.0",
+    "@metaplex-foundation/js": "^0.18.3",
     "@solana/spl-token": "^0.3.7"
   },
   "devDependencies": {
