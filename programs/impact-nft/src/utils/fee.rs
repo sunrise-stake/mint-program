@@ -4,6 +4,7 @@ use anchor_lang::solana_program::program::invoke;
 use anchor_lang::solana_program::system_instruction;
 use anchor_spl::token::{self, Token};
 
+#[allow(dead_code)]
 pub fn handle_fees<'a>(
     token_program: &Program<'a, Token>,
     fee_config: &FeeConfig,

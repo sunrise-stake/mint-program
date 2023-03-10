@@ -1,4 +1,4 @@
-import {ImpactNftClient, setUpAnchor} from "../client/src";
+import { ImpactNftClient, setUpAnchor } from "../client/src";
 import { PublicKey } from "@solana/web3.js";
 
 // USAGE
@@ -7,10 +7,10 @@ import { PublicKey } from "@solana/web3.js";
 const stateAddress = new PublicKey(process.argv[2]);
 
 (async () => {
-  console.log("Getting impact nft state...")
+  console.log("Getting impact nft state...");
   const client = await ImpactNftClient.get(setUpAnchor(), stateAddress);
 
-  console.log(client.config)
+  console.log(client.config);
   const details = await client.details();
   console.log(JSON.stringify(details, null, 2));
 })();

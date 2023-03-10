@@ -136,6 +136,36 @@ export type ImpactNft = {
       ]
     },
     {
+      "name": "addLevels",
+      "accounts": [
+        {
+          "name": "adminUpdateAuthority",
+          "isMut": false,
+          "isSigner": true
+        },
+        {
+          "name": "globalState",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "offsetTiers",
+          "isMut": true,
+          "isSigner": false
+        }
+      ],
+      "args": [
+        {
+          "name": "input",
+          "type": {
+            "vec": {
+              "defined": "Level"
+            }
+          }
+        }
+      ]
+    },
+    {
       "name": "mintNft",
       "accounts": [
         {
@@ -740,6 +770,36 @@ export const IDL: ImpactNft = {
           "name": "input",
           "type": {
             "defined": "OffsetTiersInput"
+          }
+        }
+      ]
+    },
+    {
+      "name": "addLevels",
+      "accounts": [
+        {
+          "name": "adminUpdateAuthority",
+          "isMut": false,
+          "isSigner": true
+        },
+        {
+          "name": "globalState",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "offsetTiers",
+          "isMut": true,
+          "isSigner": false
+        }
+      ],
+      "args": [
+        {
+          "name": "input",
+          "type": {
+            "vec": {
+              "defined": "Level"
+            }
           }
         }
       ]
