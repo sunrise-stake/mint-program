@@ -1,3 +1,4 @@
+import { Metaplex, walletAdapterIdentity } from "@metaplex-foundation/js";
 import { AnchorProvider, Program } from "@coral-xyz/anchor";
 import * as anchor from "@coral-xyz/anchor";
 import {
@@ -14,11 +15,6 @@ import {
   TOKEN_PROGRAM_ID,
 } from "@solana/spl-token";
 import BN from "bn.js";
-import {
-  keypairIdentity,
-  Metaplex,
-  walletAdapterIdentity,
-} from "@metaplex-foundation/js";
 
 const TOKEN_METADATA_PROGRAM_ID = new PublicKey(
   "metaqbxxUerdq28cj1RbAWkYQm3ybzjb6a8bt518x1s"
