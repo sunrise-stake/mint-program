@@ -1,10 +1,11 @@
 {
   "name": "@sunrisestake/impact-nft-client",
-  "version": "0.0.1-alpha.10",
+  "version": "0.0.1-alpha.13",
   "license": "MIT",
-  "main": "dist/index.js",
+  "main": "dist/index.cjs",
   "module": "dist/index.js",
   "types": "dist/index.d.ts",
+  "type": "module",
   "scripts": {
     "build": "tsc",
     "test": "echo \"Error: no test specified\" && exit 1"
@@ -14,12 +15,13 @@
   ],
   "dependencies": {
     "@coral-xyz/anchor": "^0.26.0",
-    "@metaplex-foundation/js": "^0.18.3",
+    "@metaplex-foundation/js": "0.18.3",
     "@solana/spl-token": "^0.3.7"
   },
   "devDependencies": {
     "@types/bn.js": "^5.1.0",
     "ts-node": "^10.9.1",
+    "tsup": "^6.6.3",
     "typescript": "^4.3.5"
   }
 }
