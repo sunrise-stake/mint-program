@@ -1,0 +1,62 @@
+[
+  {
+    "offset": "0",
+    "uri": "https://arweave.net/ybTLbVW3xNV9BM20lba4JbUif4goOm4eQFzGFiT_KAI",
+    "name": "Sunrise Impact 0",
+    "symbol": "SUN0"
+  },
+  {
+    "offset": "500000",
+    "uri": "https://arweave.net/pvICtr_nuFAY9TRqXCSThHWUa6brNbsGmIKSb8cLjPY",
+    "name": "Sunrise Impact 1",
+    "symbol": "SUN1"
+  },
+  {
+    "offset": "26000000",
+    "uri": "https://arweave.net/tXLaNrc9RdM95Hlf-7w5XHJjHDRWXEt3NCaUr_QsP0U",
+    "name": "Sunrise Impact 2",
+    "symbol": "SUN2"
+  },
+  {
+    "offset": "260000000",
+    "uri": "https://arweave.net/O2zv_mfZEpMy1WB9kYq9utNoU2E6W6ttMMfQUCzhC-I",
+    "name": "Sunrise Impact 3",
+    "symbol": "SUN3"
+  },
+  {
+    "offset": "1350000000",
+    "uri": "https://arweave.net/Dyu1kQqubxQmcm-38gbTmiVDHAzSePExa8hMFNR_26Q",
+    "name": "Sunrise Impact 4",
+    "symbol": "SUN4"
+  },
+  {
+    "offset": "4800000000",
+    "uri": "https://arweave.net/PXri0vlx4Y3MfUdw-zeG6QkJN3eAaLCkWRhRdoHELpo",
+    "name": "Sunrise Impact 5",
+    "symbol": "SUN5"
+  },
+  {
+    "offset": "13600000000",
+    "uri": "https://arweave.net/20mo34-_vK0ie_pBhJPR13n8BhwMQBDiMXgSZ5FBRBk",
+    "name": "Sunrise Impact 6",
+    "symbol": "SUN6"
+  },
+  {
+    "offset": "32800000000",
+    "uri": "https://arweave.net/a5GJFKOCbFtI9DGjwsvvzvrNJRFcOckEUl0PMoOr4Eo",
+    "name": "Sunrise Impact 7",
+    "symbol": "SUN7"
+  },
+  {
+    "offset": "70000000000",
+    "uri": "https://arweave.net/mljvGb8zBChfiYI5SFsSLTQ4fJ4qcsK46wDizL43M3k",
+    "name": "Sunrise Impact 8",
+    "symbol": "SUN8"
+  },
+  {
+    "offset": "140000000000",
+    "uri": "https://arweave.net/xWbntaDjiIcCR4X3LvwCoiTeR-k1GTMgvBcDxK8nWBw",
+    "name": "Sunrise Impact 9",
+    "symbol": "SUN9"
+  }
+]

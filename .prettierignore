@@ -6,3 +6,4 @@ node_modules
 dist
 build
 test-ledger
+packages/client/src/types/impact_nft.ts
