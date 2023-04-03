@@ -18,7 +18,7 @@ const stateAddress = new PublicKey(process.argv[2]);
     levels: details.levels.map((level) => ({
       ...level,
       offset: level.offset.toString(),
-    }))
+    })),
   };
 
   console.log(JSON.stringify(report, null, 2));
