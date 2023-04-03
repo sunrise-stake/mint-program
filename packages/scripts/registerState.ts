@@ -6,6 +6,7 @@ import BN from "bn.js";
 // USAGE
 // ANCHOR_WALLET=~/.config/solana/id.json ANCHOR_PROVIDER_URL=https://api.devnet.solana.com yarn ts-node packages/scripts/registerState.ts <mint-authority>
 
+
 const mintAuthority = new PublicKey(process.argv[2]);
 const stateAddress = process.argv.length > 3 ? new PublicKey(process.argv[3]) : undefined;
 

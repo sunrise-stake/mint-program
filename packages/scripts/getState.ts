@@ -11,6 +11,15 @@ const stateAddress = new PublicKey(process.argv[2]);
   const client = await ImpactNftClient.get(setUpAnchor(), stateAddress);
 
   console.log(client.config);
-  const details = await client.details();
-  console.log(JSON.stringify(details, null, 2));
+  const details = client.details();
+
+  const report = {
+    state: details.state,
+    levels: details.levels.map((level) => ({
+      ...level,
+      offset: level.offset.toString(),
+    }))
+  };
+
+  console.log(JSON.stringify(report, null, 2));
 })();
