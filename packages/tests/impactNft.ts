@@ -25,7 +25,7 @@ const makeTestLevels = async (client: ImpactNftClient): Promise<Level[]> => {
       `sunriseStake${i}Collection`
     );
     const level: Level = {
-      offset: new BN(i + 1).muln(100),
+      offset: new BN(i).muln(100),
       uri: metadata[i],
       name: `sunriseStake${i}`,
       symbol: `sun${i}`,
@@ -35,7 +35,11 @@ const makeTestLevels = async (client: ImpactNftClient): Promise<Level[]> => {
     levels.push(level);
   }
 
-  console.log("Created levels: ", levels.map((l) => l.offset.toString()).join(", "));
+  // creates levels 0,100,200,300,400,500
+  console.log(
+    "Created levels: ",
+    levels.map((l) => l.offset.toString()).join(", ")
+  );
 
   return levels;
 };
@@ -54,9 +58,9 @@ describe("impact-nft", () => {
   let levels: Level[];
 
   const principal = new BN(100); // used to calculate the fee
-  const initialOffset = new BN(140); // should still default to a level0 nft
-  const updatedOffset = new BN(220); // should upgrade to a level 1 nft
-  const level2Offset = new BN(320); // should upgrade to a level 2 nft
+  const initialOffset = new BN(40); // should still default to a level0 nft
+  const updatedOffset = new BN(120); // should upgrade to a level 1 nft
+  const level2Offset = new BN(220); // should upgrade to a level 2 nft
   const aboveHighestOffset = new BN(10000); // should upgrade to a level 5 nft
 
   const mint = Keypair.generate();
@@ -132,27 +136,37 @@ describe("impact-nft", () => {
     );
   });
 
-  it('should calculate the current level', () => {
+  it("should calculate the current level", () => {
     expect(client.getLevelForOffset(initialOffset).index).to.equal(0);
     expect(client.getLevelForOffset(updatedOffset).index).to.equal(1);
     expect(client.getLevelForOffset(level2Offset).index).to.equal(2);
     expect(client.getLevelForOffset(aboveHighestOffset).index).to.equal(5);
   });
 
-  it('should calculate the amount needed to reach the next level', () => {
-    expect(client.getAmountToNextOffset(initialOffset)?.toNumber()).to.equal(60);
-    expect(client.getAmountToNextOffset(updatedOffset)?.toNumber()).to.equal(80);
+  it("should calculate the amount needed to reach the next level", () => {
+    expect(client.getAmountToNextOffset(initialOffset)?.toNumber()).to.equal(
+      60
+    );
+    expect(client.getAmountToNextOffset(updatedOffset)?.toNumber()).to.equal(
+      80
+    );
     expect(client.getAmountToNextOffset(level2Offset)?.toNumber()).to.equal(80);
     expect(client.getAmountToNextOffset(aboveHighestOffset)).to.be.null;
+
+    // the first level is at 0
+    // we support starting at a negative offset
+    expect(client.getAmountToNextOffset(new BN(-50)).toNumber()).to.equal(50);
   });
 
   it("can update an nft", async () => {
     await client.updateNft(mint, mintAuthority, user.publicKey, updatedOffset);
 
-    const offsetMetadataAddress = client.getOffsetMetadataAddress(mint.publicKey);
+    const offsetMetadataAddress = client.getOffsetMetadataAddress(
+      mint.publicKey
+    );
 
     let offsetMetadata = await program.account.offsetMetadata.fetch(
-        offsetMetadataAddress
+      offsetMetadataAddress
     );
     assert(offsetMetadata.offset.eq(updatedOffset));
 

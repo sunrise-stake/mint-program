@@ -1,5 +1,5 @@
 import { Metaplex, walletAdapterIdentity } from "@metaplex-foundation/js";
-import {AccountNamespace, AnchorProvider, Program } from "@coral-xyz/anchor";
+import { AccountNamespace, AnchorProvider, Program } from "@coral-xyz/anchor";
 import * as anchor from "@coral-xyz/anchor";
 import {
   PublicKey,
@@ -17,11 +17,11 @@ import {
 import BN from "bn.js";
 
 const TOKEN_METADATA_PROGRAM_ID = new PublicKey(
-    "metaqbxxUerdq28cj1RbAWkYQm3ybzjb6a8bt518x1s"
+  "metaqbxxUerdq28cj1RbAWkYQm3ybzjb6a8bt518x1s"
 );
 
 export const PROGRAM_ID = new PublicKey(
-    "SUNFT6ErsQvMcDzMcGyndq2P31wYCFs6G6WEcoyGkGc"
+  "SUNFT6ErsQvMcDzMcGyndq2P31wYCFs6G6WEcoyGkGc"
 );
 
 export interface Level {
@@ -33,7 +33,7 @@ export interface Level {
   index: number;
 }
 
-export type RawLevel = Omit<Level, 'index'>
+export type RawLevel = Omit<Level, "index">;
 
 export type FeeConfig = {
   fee: BN; // fixed or basis point (0- 10_000)
@@ -70,10 +70,10 @@ type CollectionAccounts = {
 type AllMintAccounts = BaseMintAccounts & FeeAccounts & CollectionAccounts;
 
 export const confirm = (connection: Connection) => async (txSig: string) =>
-    connection.confirmTransaction({
-      signature: txSig,
-      ...(await connection.getLatestBlockhash()),
-    });
+  connection.confirmTransaction({
+    signature: txSig,
+    ...(await connection.getLatestBlockhash()),
+  });
 
 export const setUpAnchor = (): anchor.AnchorProvider => {
   // Configure the client to use the local cluster.
@@ -84,10 +84,10 @@ export const setUpAnchor = (): anchor.AnchorProvider => {
 };
 
 const getOffsetTiersAddress = (stateAddress: PublicKey) =>
-    PublicKey.findProgramAddressSync(
-        [Buffer.from("offset_tiers"), stateAddress.toBuffer()],
-        PROGRAM_ID
-    )[0];
+  PublicKey.findProgramAddressSync(
+    [Buffer.from("offset_tiers"), stateAddress.toBuffer()],
+    PROGRAM_ID
+  )[0];
 
 export interface ImpactNftClientConfig {
   mintAuthority: PublicKey;
@@ -100,8 +100,16 @@ export interface ImpactNftClientConfig {
 export class ImpactNftClient {
   config: ImpactNftClientConfig | undefined;
   readonly program: Program<ImpactNft>;
-  state: Awaited<ReturnType<AccountNamespace<ImpactNft>['globalState']['fetchNullable']>> | undefined
-  tiers: Awaited<ReturnType<AccountNamespace<ImpactNft>['offsetTiers']['fetchNullable']>> | undefined
+  state:
+    | Awaited<
+        ReturnType<AccountNamespace<ImpactNft>["globalState"]["fetchNullable"]>
+      >
+    | undefined;
+  tiers:
+    | Awaited<
+        ReturnType<AccountNamespace<ImpactNft>["offsetTiers"]["fetchNullable"]>
+      >
+    | undefined;
   stateAddress: PublicKey | undefined;
 
   readonly metaplex: Metaplex;
@@ -109,14 +117,14 @@ export class ImpactNftClient {
   private constructor(readonly provider: AnchorProvider) {
     this.program = new Program<ImpactNft>(IDL, PROGRAM_ID, provider);
     this.metaplex = Metaplex.make(provider.connection).use(
-        walletAdapterIdentity(provider.wallet)
+      walletAdapterIdentity(provider.wallet)
     );
   }
 
   public static async register(
-      adminMintAuthority: PublicKey,
-      levels: number,
-      fee?: FeeConfig
+    adminMintAuthority: PublicKey,
+    levels: number,
+    fee?: FeeConfig
   ): Promise<ImpactNftClient> {
     const client = new ImpactNftClient(setUpAnchor());
     const stateKey = Keypair.generate();
@@ -131,28 +139,28 @@ export class ImpactNftClient {
     };
 
     await client.program.methods
-        .createGlobalState({
-          adminMintAuthority,
-          levels,
-          fee: fee || null,
-        })
-        .accounts(accounts)
-        .signers([stateKey])
-        .rpc()
-        .then(() => confirm(client.provider.connection));
+      .createGlobalState({
+        adminMintAuthority,
+        levels,
+        fee: fee || null,
+      })
+      .accounts(accounts)
+      .signers([stateKey])
+      .rpc()
+      .then(() => confirm(client.provider.connection));
 
     console.log("Created global state", stateKey.publicKey.toBase58());
 
-    console.log("initialising...")
+    console.log("initialising...");
     await client.init(stateKey.publicKey);
 
-    console.log("initialised")
+    console.log("initialised");
     return client;
   }
 
   public static async get(
-      provider: AnchorProvider,
-      stateAddress: PublicKey
+    provider: AnchorProvider,
+    stateAddress: PublicKey
   ): Promise<ImpactNftClient> {
     const client = new ImpactNftClient(provider);
     await client.init(stateAddress);
@@ -164,7 +172,9 @@ export class ImpactNftClient {
     this.state = await this.program.account.globalState.fetch(stateAddress);
 
     const tiersAddress = this.getOffsetTiersAddress();
-    this.tiers = await this.program.account.offsetTiers.fetchNullable(tiersAddress);
+    this.tiers = await this.program.account.offsetTiers.fetchNullable(
+      tiersAddress
+    );
 
     const tokenAuthority = this.getTokenAuthorityAddress(stateAddress);
 
@@ -188,8 +198,8 @@ export class ImpactNftClient {
 
   public getTokenAuthorityAddress(state: PublicKey): PublicKey {
     return PublicKey.findProgramAddressSync(
-        [Buffer.from("token_authority"), state.toBuffer()],
-        PROGRAM_ID
+      [Buffer.from("token_authority"), state.toBuffer()],
+      PROGRAM_ID
     )[0];
   }
 
@@ -201,43 +211,43 @@ export class ImpactNftClient {
   public getOffsetMetadataAddress(mint: PublicKey): PublicKey {
     if (!this.stateAddress) throw new Error("Client not initialized");
     return PublicKey.findProgramAddressSync(
-        [
-          Buffer.from("offset_metadata"),
-          mint.toBuffer(),
-          this.stateAddress.toBuffer(),
-        ],
-        PROGRAM_ID
+      [
+        Buffer.from("offset_metadata"),
+        mint.toBuffer(),
+        this.stateAddress.toBuffer(),
+      ],
+      PROGRAM_ID
     )[0];
   }
 
   /** get metadata account... can't find an easy way to do this via their sdk */
   public getMetadataAddress(mint: PublicKey): PublicKey {
     return PublicKey.findProgramAddressSync(
-        [
-          Buffer.from("metadata"),
-          TOKEN_METADATA_PROGRAM_ID.toBuffer(),
-          mint.toBuffer(),
-        ],
-        TOKEN_METADATA_PROGRAM_ID
+      [
+        Buffer.from("metadata"),
+        TOKEN_METADATA_PROGRAM_ID.toBuffer(),
+        mint.toBuffer(),
+      ],
+      TOKEN_METADATA_PROGRAM_ID
     )[0];
   }
 
   /** get master edition account... can't find an easy way to do this via their sdk */
   public getMasterEditionAddress(mint: PublicKey): PublicKey {
     return PublicKey.findProgramAddressSync(
-        [
-          Buffer.from("metadata"),
-          TOKEN_METADATA_PROGRAM_ID.toBuffer(),
-          mint.toBuffer(),
-          Buffer.from("edition"),
-        ],
-        TOKEN_METADATA_PROGRAM_ID
+      [
+        Buffer.from("metadata"),
+        TOKEN_METADATA_PROGRAM_ID.toBuffer(),
+        mint.toBuffer(),
+        Buffer.from("edition"),
+      ],
+      TOKEN_METADATA_PROGRAM_ID
     )[0];
   }
 
   public async createCollectionMint(
-      uri: string,
-      name: string
+    uri: string,
+    name: string
   ): Promise<Keypair> {
     if (!this.config) throw new Error("Client not initialized");
     const mint = Keypair.generate();
@@ -265,19 +275,21 @@ export class ImpactNftClient {
     const offsetTiersAddress = this.getOffsetTiersAddress();
 
     await this.program.methods
-        .createOffsetTiers({
-          levels,
-        })
-        .accounts({
-          adminUpdateAuthority: this.provider.publicKey,
-          globalState: this.stateAddress,
-          offsetTiers: offsetTiersAddress,
-          systemProgram: SystemProgram.programId,
-        })
-        .rpc()
-        .then(() => confirm(this.provider.connection));
+      .createOffsetTiers({
+        levels,
+      })
+      .accounts({
+        adminUpdateAuthority: this.provider.publicKey,
+        globalState: this.stateAddress,
+        offsetTiers: offsetTiersAddress,
+        systemProgram: SystemProgram.programId,
+      })
+      .rpc()
+      .then(() => confirm(this.provider.connection));
 
-    this.tiers = await this.program.account.offsetTiers.fetchNullable(offsetTiersAddress);
+    this.tiers = await this.program.account.offsetTiers.fetchNullable(
+      offsetTiersAddress
+    );
   }
 
   public async addLevelsToOffsetTiers(levels: RawLevel[]) {
@@ -285,21 +297,23 @@ export class ImpactNftClient {
 
     const offsetTiersAddress = this.getOffsetTiersAddress();
     await this.program.methods
-        .addLevels(levels)
-        .accounts({
-          adminUpdateAuthority: this.provider.publicKey,
-          globalState: this.stateAddress,
-          offsetTiers: offsetTiersAddress,
-        })
-        .rpc()
-        .then(() => confirm(this.provider.connection));
+      .addLevels(levels)
+      .accounts({
+        adminUpdateAuthority: this.provider.publicKey,
+        globalState: this.stateAddress,
+        offsetTiers: offsetTiersAddress,
+      })
+      .rpc()
+      .then(() => confirm(this.provider.connection));
 
-    this.tiers = await this.program.account.offsetTiers.fetchNullable(offsetTiersAddress);
+    this.tiers = await this.program.account.offsetTiers.fetchNullable(
+      offsetTiersAddress
+    );
   }
 
   public async getMintNftAccounts(
-      mint: PublicKey,
-      user: PublicKey
+    mint: PublicKey,
+    user: PublicKey
   ): Promise<AllMintAccounts> {
     if (!this.stateAddress || !this.config)
       throw new Error("Client not initialized");
@@ -339,15 +353,15 @@ export class ImpactNftClient {
         if (!this.config.fee.splTokenMint)
           throw new Error("No spl token mint provided for fee of type SPL");
         feeAccounts.payerTokenAccount = getAssociatedTokenAddressSync(
-            this.config.fee.splTokenMint,
-            user,
-            true
+          this.config.fee.splTokenMint,
+          user,
+          true
         );
 
         feeAccounts.recipientTokenAccount = getAssociatedTokenAddressSync(
-            this.config.fee.splTokenMint,
-            this.config.fee.recipient,
-            true
+          this.config.fee.splTokenMint,
+          this.config.fee.recipient,
+          true
         );
       } else {
         feeAccounts.recipient = this.config.fee.recipient;
@@ -361,23 +375,31 @@ export class ImpactNftClient {
     if (!this.tiers) throw new Error("Client not initialized");
     // search backwards so we get the highest level
     const level = this.levels
-        .reverse()
-        .find((level, index) => offset.gte(level.offset));
+      .reverse()
+      .find((level, index) => offset.gte(level.offset));
     return level || null;
   }
 
+  /*
+   * Returns the amount of needed to reach the next offset level
+   * If the offset is higher than the highest level, returns null (no more levels)
+   */
   public getAmountToNextOffset(offset: anchor.BN): anchor.BN | null {
     if (!this.tiers) throw new Error("Client not initialized");
     const level = this.getLevelForOffset(offset);
-    if (!level) return null;
+
+    // if no level was found, the offset is lower than the lowest level
+    // so we return the offset of the lowest level ( minus the current offset)
+    if (!level) return this.levels[0].offset.sub(offset);
+
     const nextLevel = this.levels[level.index + 1];
     if (!nextLevel) return null;
     return nextLevel.offset.sub(offset);
   }
 
   public async getUpdateNftAccounts(
-      mint: PublicKey,
-      offset: anchor.BN
+    mint: PublicKey,
+    offset: anchor.BN
   ): Promise<{
     collectionMint: PublicKey;
     collectionMetadata: PublicKey;
@@ -393,14 +415,14 @@ export class ImpactNftClient {
     const collectionMint = await this.getCurrentCollectionForMint(mint);
     const collectionMetadata = this.getMetadataAddress(collectionMint);
     const collectionMasterEdition =
-        this.getMasterEditionAddress(collectionMint);
+      this.getMasterEditionAddress(collectionMint);
 
     const newCollectionMint = await this.getUpdateCollectionForOffset(offset);
     if (newCollectionMint === null)
       throw new Error("No levels in offset tiers");
     const newCollectionMetadata = this.getMetadataAddress(newCollectionMint);
     const newCollectionMasterEdition =
-        this.getMasterEditionAddress(newCollectionMint);
+      this.getMasterEditionAddress(newCollectionMint);
 
     return {
       collectionMint,
@@ -414,14 +436,15 @@ export class ImpactNftClient {
   }
 
   private async getCurrentCollectionForMint(
-      mint: PublicKey
+    mint: PublicKey
   ): Promise<PublicKey> {
-    if (!this.stateAddress || !this.tiers) throw new Error("Client not initialized");
+    if (!this.stateAddress || !this.tiers)
+      throw new Error("Client not initialized");
 
     let offsetMetadata = this.getOffsetMetadataAddress(mint);
     let index = await this.program.account.offsetMetadata
-        .fetch(offsetMetadata)
-        .then((res) => res.currentLevelIndex);
+      .fetch(offsetMetadata)
+      .then((res) => res.currentLevelIndex);
 
     let levels = this.tiers.levels as Level[];
 
@@ -430,7 +453,7 @@ export class ImpactNftClient {
 
   // Mirrors offsetTiers.getLevel()
   private async getUpdateCollectionForOffset(
-      offset: anchor.BN
+    offset: anchor.BN
   ): Promise<PublicKey | null> {
     const level = this.getLevelForOffset(offset);
     return level?.collectionMint || null;
@@ -442,8 +465,8 @@ export class ImpactNftClient {
 
     // add the index to each level
     return rawLevels.map((level, index) => ({
-        ...level,
-        index,
+      ...level,
+      index,
     }));
   }
 
@@ -453,7 +476,7 @@ export class ImpactNftClient {
     const collectionMint = levels[0].collectionMint;
     const collectionMetadata = this.getMetadataAddress(collectionMint);
     const collectionMasterEdition =
-        this.getMasterEditionAddress(collectionMint);
+      this.getMasterEditionAddress(collectionMint);
 
     return {
       collectionMint,
@@ -463,11 +486,11 @@ export class ImpactNftClient {
   }
 
   public async mintNft(
-      mint: Keypair,
-      mintAuthority: Keypair,
-      user: PublicKey,
-      initialOffset: BN,
-      principal: BN
+    mint: Keypair,
+    mintAuthority: Keypair,
+    user: PublicKey,
+    initialOffset: BN,
+    principal: BN
   ) {
     const mintNftAccounts = await this.getMintNftAccounts(mint.publicKey, user);
     const modifyComputeUnits = ComputeBudgetProgram.setComputeUnitLimit({
@@ -488,38 +511,35 @@ export class ImpactNftClient {
     };
 
     return this.program.methods
-        .mintNft(initialOffset, principal)
-        .accounts(accounts)
-        .preInstructions([modifyComputeUnits])
-        .signers([mint, mintAuthority])
-        .rpc();
+      .mintNft(initialOffset, principal)
+      .accounts(accounts)
+      .preInstructions([modifyComputeUnits])
+      .signers([mint, mintAuthority])
+      .rpc();
   }
 
   public async updateNft(
-        mint: Keypair,
-        mintAuthority: Keypair,
-        user: PublicKey,
-        updatedOffset: BN,
+    mint: Keypair,
+    mintAuthority: Keypair,
+    user: PublicKey,
+    updatedOffset: BN
   ) {
-    const accounts = await this.getMintNftAccounts(
-        mint.publicKey,
-        user
-    );
+    const accounts = await this.getMintNftAccounts(mint.publicKey, user);
     const updateAccounts = await this.getUpdateNftAccounts(
-        mint.publicKey,
-        updatedOffset
+      mint.publicKey,
+      updatedOffset
     );
 
     return this.program.methods
-        .updateNft(updatedOffset)
-        .accounts({
-          ...accounts,
-          ...updateAccounts,
-          globalState: this.stateAddress,
-          mint: mint.publicKey,
-          tokenProgram: TOKEN_PROGRAM_ID,
-        })
-        .signers([mintAuthority])
-        .rpc();
+      .updateNft(updatedOffset)
+      .accounts({
+        ...accounts,
+        ...updateAccounts,
+        globalState: this.stateAddress,
+        mint: mint.publicKey,
+        tokenProgram: TOKEN_PROGRAM_ID,
+      })
+      .signers([mintAuthority])
+      .rpc();
   }
 }
