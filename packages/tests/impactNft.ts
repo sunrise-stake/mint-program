@@ -30,9 +30,12 @@ const makeTestLevels = async (client: ImpactNftClient): Promise<Level[]> => {
       name: `sunriseStake${i}`,
       symbol: `sun${i}`,
       collectionMint: mint.publicKey,
+      index: i,
     };
     levels.push(level);
   }
+
+  console.log("Created levels: ", levels.map((l) => l.offset.toString()).join(", "));
 
   return levels;
 };
@@ -49,11 +52,12 @@ describe("impact-nft", () => {
   });
 
   let levels: Level[];
-  let stateAddress: PublicKey;
 
   const principal = new BN(100); // used to calculate the fee
   const initialOffset = new BN(140); // should still default to a level0 nft
-  const updatedOffset = new BN(220); // should upgrade to a level1 nft
+  const updatedOffset = new BN(220); // should upgrade to a level 1 nft
+  const level2Offset = new BN(320); // should upgrade to a level 2 nft
+  const aboveHighestOffset = new BN(10000); // should upgrade to a level 5 nft
 
   const mint = Keypair.generate();
 
@@ -67,26 +71,21 @@ describe("impact-nft", () => {
 
     expect(client.stateAddress).not.to.be.null;
 
-    stateAddress = client.stateAddress as PublicKey;
-
-    const state = await program.account.globalState.fetch(stateAddress);
-    expect(state.adminMintAuthority.toBase58()).equal(
+    expect(client.state.adminMintAuthority.toBase58()).equal(
       mintAuthority.publicKey.toBase58()
     );
-    expect(state.adminUpdateAuthority.toBase58()).equal(
+    expect(client.state.adminUpdateAuthority.toBase58()).equal(
       client.provider.publicKey.toBase58()
     );
-    expect(state.levels).equal(levels);
-    expect(state.fee).to.equal(null);
+    expect(client.state.levels).equal(levels);
+    expect(client.state.fee).to.equal(null);
   });
 
   it("Can create offset tiers", async () => {
     levels = await makeTestLevels(client);
     await client.registerOffsetTiers(levels.slice(0, 3));
 
-    const offsetTiersAddress = client.getOffsetTiersAddress();
-
-    const tiers = await program.account.offsetTiers.fetch(offsetTiersAddress);
+    const tiers = client.tiers;
 
     assert((tiers.levels[0].offset as BN).eq(levels[0].offset));
     assert((tiers.levels[1].offset as BN).eq(levels[1].offset));
@@ -100,9 +99,7 @@ describe("impact-nft", () => {
   it("Can add to offset tiers", async () => {
     await client.addLevelsToOffsetTiers(levels.slice(3, 6));
 
-    const tiers = await program.account.offsetTiers.fetch(
-      client.getOffsetTiersAddress()
-    );
+    const tiers = client.tiers;
 
     assert((tiers.levels[3].uri as string) == levels[3].uri);
     assert((tiers.levels[4].uri as string) == levels[4].uri);
@@ -135,30 +132,27 @@ describe("impact-nft", () => {
     );
   });
 
-  it("can update an nft", async () => {
-    const accounts = await client.getMintNftAccounts(
-      mint.publicKey,
-      user.publicKey
-    );
-    const updateAccounts = await client.getUpdateNftAccounts(
-      mint.publicKey,
-      updatedOffset
-    );
+  it('should calculate the current level', () => {
+    expect(client.getLevelForOffset(initialOffset).index).to.equal(0);
+    expect(client.getLevelForOffset(updatedOffset).index).to.equal(1);
+    expect(client.getLevelForOffset(level2Offset).index).to.equal(2);
+    expect(client.getLevelForOffset(aboveHighestOffset).index).to.equal(5);
+  });
 
-    await program.methods
-      .updateNft(updatedOffset)
-      .accounts({
-        ...accounts,
-        ...updateAccounts,
-        globalState: client.stateAddress,
-        mint: mint.publicKey,
-        tokenProgram: TOKEN_PROGRAM_ID,
-      })
-      .signers([mintAuthority])
-      .rpc();
+  it('should calculate the amount needed to reach the next level', () => {
+    expect(client.getAmountToNextOffset(initialOffset)?.toNumber()).to.equal(60);
+    expect(client.getAmountToNextOffset(updatedOffset)?.toNumber()).to.equal(80);
+    expect(client.getAmountToNextOffset(level2Offset)?.toNumber()).to.equal(80);
+    expect(client.getAmountToNextOffset(aboveHighestOffset)).to.be.null;
+  });
+
+  it("can update an nft", async () => {
+    await client.updateNft(mint, mintAuthority, user.publicKey, updatedOffset);
+
+    const offsetMetadataAddress = client.getOffsetMetadataAddress(mint.publicKey);
 
     let offsetMetadata = await program.account.offsetMetadata.fetch(
-      accounts.offsetMetadata
+        offsetMetadataAddress
     );
     assert(offsetMetadata.offset.eq(updatedOffset));
 
@@ -204,7 +198,7 @@ describe("impact-nft", () => {
       );
       await client.registerOffsetTiers(levels.slice(0, 5));
 
-      const { state } = await client.details();
+      const { state } = client.details();
       expect(state.fee.fee.toNumber()).to.equal(feeConfig.fee.toNumber());
       expect(state.fee.feeType).to.deep.equal({ percentage: {} });
     });
