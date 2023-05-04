@@ -384,9 +384,9 @@ export class ImpactNftClient {
    * Returns the amount of needed to reach the next offset level
    * If the offset is higher than the highest level, returns null (no more levels)
    */
-  public getAmountToNextOffset(offset: anchor.BN): anchor.BN | null {
+  public getAmountToNextOffset(offset: anchor.BN, currentLevel?: number): anchor.BN | null {
     if (!this.tiers) throw new Error("Client not initialized");
-    const level = this.getLevelForOffset(offset);
+    const level = currentLevel !== undefined ? this.levels[currentLevel] : this.getLevelForOffset(offset);
 
     // if no level was found, the offset is lower than the lowest level
     // so we return the offset of the lowest level ( minus the current offset)
