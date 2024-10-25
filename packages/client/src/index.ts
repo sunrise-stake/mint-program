@@ -8,7 +8,7 @@ import {
   Connection,
   ComputeBudgetProgram,
 } from "@solana/web3.js";
-import { ImpactNft, IDL } from "./types/impact_nft";
+import { ImpactNft, IDL } from "./types/impact_nft.js";
 import {
   ASSOCIATED_TOKEN_PROGRAM_ID,
   getAssociatedTokenAddressSync,

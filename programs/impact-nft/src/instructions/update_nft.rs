@@ -1,9 +1,10 @@
 use crate::error::ErrorCode;
 use crate::seeds::{OFFSET_METADATA_SEED, OFFSET_TIERS_SEED, TOKEN_AUTHORITY_SEED};
 use crate::state::{GlobalState, OffsetMetadata, OffsetTiers};
-use crate::utils::metaplex::{check_metadata_account, unverify_nft, update_metadata, verify_nft};
+use crate::utils::metaplex::{unverify_nft, update_metadata, verify_nft};
 use anchor_lang::prelude::*;
 use anchor_spl::token::{Mint, Token};
+use anchor_spl::metadata::Metadata;
 
 /// Permissionless. Requires the external admin_mint_authority
 #[derive(Accounts)]
@@ -38,12 +39,11 @@ pub struct UpdateNft<'info> {
 
     #[account(mut)]
     pub mint: Account<'info, Mint>,
-    /// CHECK: Verified with the check_metadata_account helper function
     #[account(
         mut,
-        constraint = check_metadata_account(&metadata, &mint.to_account_info()),
+        has_one = mint
     )]
-    pub metadata: UncheckedAccount<'info>,
+    pub metadata: Account<'info, Metadata>,
 
     // todo: Move to instruction?
     #[account(address = new_collection(&offset_tiers, offset_amount))]
@@ -54,6 +54,8 @@ pub struct UpdateNft<'info> {
     pub new_collection_metadata: UncheckedAccount<'info>,
     /// CHECK: Checked by CPI to Metaplex
     pub new_collection_master_edition: UncheckedAccount<'info>,
+    /// CHECK: Checked by CPI to Metaplex
+    pub new_collection_authority_record: UncheckedAccount<'info>,
 
     #[account(address = current_collection(&offset_metadata, &offset_tiers))]
     /// CHECK: Checked by offsetTiers state
@@ -63,11 +65,11 @@ pub struct UpdateNft<'info> {
     pub collection_metadata: UncheckedAccount<'info>,
     /// CHECK: Checked by CPI to Metaplex
     pub collection_master_edition: UncheckedAccount<'info>,
+    /// CHECK: Checked by CPI to Metaplex
+    pub collection_authority_record: UncheckedAccount<'info>,
 
     pub token_program: Program<'info, Token>,
-    #[account(address = mpl_token_metadata::ID)]
-    /// CHECK: Verified program address
-    pub token_metadata_program: UncheckedAccount<'info>,
+    pub token_metadata_program: Program<'info, crate::mpl_token_metadata::program::MplTokenMetadata>,
 }
 
 // Todo: Run a check to see if this is needed by attempting to unverify from a
@@ -95,7 +97,7 @@ pub fn update_nft_handler(ctx: Context<UpdateNft>, offset_amount: u64) -> Result
 
     let token_authority = &ctx.accounts.token_authority;
     let global_state = &ctx.accounts.global_state;
-    let token_authority_bump = *ctx.bumps.get("token_authority").unwrap();
+    let token_authority_bump = ctx.bumps.token_authority;
 
     // TODO: check that offset_tiers.levels.len() > 0
     if offset_tiers.levels.is_empty() {
@@ -117,34 +119,38 @@ pub fn update_nft_handler(ctx: Context<UpdateNft>, offset_amount: u64) -> Result
 
         msg!("Unverifying...");
         unverify_nft(
-            &ctx.accounts.metadata,
-            &ctx.accounts.payer,
-            &ctx.accounts.collection_mint,
-            &ctx.accounts.collection_metadata,
-            &ctx.accounts.collection_master_edition,
+            ctx.accounts.metadata.to_account_info(),
+            ctx.accounts.payer.to_account_info(),
+            ctx.accounts.collection_mint.to_account_info(),
+            ctx.accounts.collection_metadata.to_account_info(),
+            ctx.accounts.collection_master_edition.to_account_info(),
+            ctx.accounts.collection_authority_record.to_account_info(),
             &global_state.key(),
-            token_authority,
+            token_authority.to_account_info(),
             token_authority_bump,
+            ctx.accounts.token_metadata_program.to_account_info(),
         )?;
         msg!("Updating...");
         update_metadata(
             new_level,
-            &metadata.to_account_info(),
-            &ctx.accounts.token_metadata_program,
+            metadata.to_account_info(),
             &global_state.key(),
-            &ctx.accounts.token_authority,
+            ctx.accounts.token_authority.to_account_info(),
             token_authority_bump,
+            ctx.accounts.token_metadata_program.to_account_info(),
         )?;
         msg!("Verifying...");
         verify_nft(
-            &ctx.accounts.metadata,
-            &ctx.accounts.payer,
-            &ctx.accounts.new_collection_mint,
-            &ctx.accounts.new_collection_metadata,
-            &ctx.accounts.new_collection_master_edition,
+            ctx.accounts.metadata.to_account_info(),
+            ctx.accounts.payer.to_account_info(),
+            ctx.accounts.new_collection_mint.to_account_info(),
+            ctx.accounts.new_collection_metadata.to_account_info(),
+            ctx.accounts.new_collection_master_edition.to_account_info(),
+            ctx.accounts.new_collection_authority_record.to_account_info(),
             &global_state.key(),
-            token_authority,
+            token_authority.to_account_info(),
             token_authority_bump,
+            ctx.accounts.token_metadata_program.to_account_info(),
         )?;
     } else {
         return Err(ErrorCode::InvalidUpdateForMint.into());

@@ -7,6 +7,7 @@ use crate::utils::token::{create_mint, create_token_account, mint_to};
 use anchor_lang::prelude::*;
 use anchor_spl::associated_token::AssociatedToken;
 use anchor_spl::token::Token;
+use crate::mpl_token_metadata;
 
 /// Permissionless. The required external verification
 /// is the admin_mint_authority
@@ -67,12 +68,12 @@ pub struct MintNft<'info> {
     pub collection_metadata: UncheckedAccount<'info>,
     /// CHECK: Checked by CPI to Metaplex
     pub collection_master_edition: UncheckedAccount<'info>,
+    /// CHECK: Checked by CPI to Metaplex
+    pub collection_authority_record: UncheckedAccount<'info>,
 
     pub token_program: Program<'info, Token>,
     pub associated_token_program: Program<'info, AssociatedToken>,
-    #[account(address = mpl_token_metadata::ID)]
-    /// CHECK: Verified program address
-    pub token_metadata_program: UncheckedAccount<'info>,
+    pub token_metadata_program: Program<'info, mpl_token_metadata::program::MplTokenMetadata>,
     pub system_program: Program<'info, System>,
     pub rent: Sysvar<'info, Rent>,
     // disable fee payment until the client integration supports it
@@ -98,7 +99,7 @@ pub fn mint_nft_handler(ctx: Context<MintNft>, offset_amount: u64, _principal: u
     let metadata = &mut ctx.accounts.metadata;
     let master_edition = &mut ctx.accounts.master_edition;
     let global_state = &ctx.accounts.global_state;
-    let token_authority_bump = *ctx.bumps.get("token_authority").unwrap();
+    let token_authority_bump = ctx.bumps.token_authority;
 
     if offset_tiers.levels.is_empty() {
         return Err(ErrorCode::NoOffsetTiers.into());
@@ -164,30 +165,30 @@ pub fn mint_nft_handler(ctx: Context<MintNft>, offset_amount: u64, _principal: u
     msg!("creating metadata account");
     create_metadata_account(
         &offset_tiers.levels[0],
-        &metadata.to_account_info(),
-        &mint.to_account_info(),
-        &payer.to_account_info(),
-        &token_authority.to_account_info(),
-        token_metadata_program,
-        system_program,
-        &rent.to_account_info(),
+        metadata.to_account_info(),
+        mint.to_account_info(),
+        payer.to_account_info(),
         &global_state.key(),
-        &token_authority.to_account_info(),
+        token_authority.to_account_info(),
         token_authority_bump,
+        token_metadata_program.to_account_info(),
+        system_program.to_account_info(),
+        rent.to_account_info(),
     )?;
 
     msg!("creating master edition account");
     create_master_edition_account(
-        master_edition,
-        mint,
-        payer,
-        metadata,
-        token_metadata_program,
-        system_program,
-        &ctx.accounts.rent.to_account_info(),
+        master_edition.to_account_info(),
+        mint.to_account_info(),
+        payer.to_account_info(),
+        metadata.to_account_info(),
         &global_state.key(),
-        token_authority,
+        token_authority.to_account_info(),
         token_authority_bump,
+        token_metadata_program.to_account_info(),
+        system_program.to_account_info(),
+        token_program.to_account_info(),
+        rent.to_account_info(),
     )?;
 
     if let Some(_fee_config) = &ctx.accounts.global_state.fee {
@@ -219,18 +220,20 @@ pub fn mint_nft_handler(ctx: Context<MintNft>, offset_amount: u64, _principal: u
 
     ctx.accounts
         .offset_metadata
-        .set(offset_amount, *ctx.bumps.get("offset_metadata").unwrap(), 0);
+        .set(offset_amount, ctx.bumps.offset_metadata, 0);
 
     msg!("Verifying collection");
     verify_nft(
-        metadata,
-        payer,
-        &ctx.accounts.collection_mint,
-        &ctx.accounts.collection_metadata,
-        &ctx.accounts.collection_master_edition,
+        metadata.to_account_info(),
+        payer.to_account_info(),
+        ctx.accounts.collection_mint.to_account_info(),
+        ctx.accounts.collection_metadata.to_account_info(),
+        ctx.accounts.collection_master_edition.to_account_info(),
+        ctx.accounts.collection_authority_record.to_account_info(),
         &global_state.key(),
-        token_authority,
+        token_authority.to_account_info(),
         token_authority_bump,
+        token_metadata_program.to_account_info(),
     )?;
     Ok(())
 }

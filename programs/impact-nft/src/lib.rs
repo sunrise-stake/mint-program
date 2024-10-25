@@ -2,6 +2,12 @@
 #![allow(clippy::too_many_arguments)]
 use anchor_lang::prelude::*;
 
+declare_id!("SUNFT6ErsQvMcDzMcGyndq2P31wYCFs6G6WEcoyGkGc");
+// anchor-spl exports the mpl_token_metadata crate but you can't CPI from it
+// to allow us to use the anchor CPI features we export it here via declare_program!
+// Warning - this might bloat the program size
+declare_program!(mpl_token_metadata);
+
 pub mod state;
 use state::*;
 
@@ -11,8 +17,6 @@ pub mod utils;
 
 pub mod instructions;
 use instructions::*;
-
-declare_id!("SUNFT6ErsQvMcDzMcGyndq2P31wYCFs6G6WEcoyGkGc");
 
 #[program]
 pub mod impact_nft {
