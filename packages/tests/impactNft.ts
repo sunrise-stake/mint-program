@@ -5,7 +5,6 @@ import { expect, assert } from "chai";
 import BN from "bn.js";
 import { ImpactNftClient, Level } from "../client/src";
 import { Keypair, LAMPORTS_PER_SOL, PublicKey } from "@solana/web3.js";
-import { TOKEN_PROGRAM_ID } from "@solana/spl-token";
 import { getTestMetadata } from "./util";
 
 const program = anchor.workspace.ImpactNft as Program<ImpactNft>;
@@ -156,6 +155,11 @@ describe("impact-nft", () => {
     // the first level is at 0
     // we support starting at a negative offset
     expect(client.getAmountToNextOffset(new BN(-50)).toNumber()).to.equal(50);
+
+    // if a current level is passed, use that level rather than assuming the level from the offset
+    expect(client.getAmountToNextOffset(updatedOffset, 0)?.toNumber()).to.equal(
+        -20
+    );
   });
 
   it("can update an nft", async () => {

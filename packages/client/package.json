@@ -1,19 +1,19 @@
 {
   "name": "@sunrisestake/impact-nft-client",
-  "version": "0.0.3",
+  "version": "0.0.5-module.4",
   "license": "MIT",
-  "main": "dist/index.js",
-  "module": "dist/index.mjs",
-  "types": "dist/index.d.ts",
-  "type": "commonjs",
+  "main": "dist/cjs/index.js",
+  "module": "dist/esm/index.js",
+  "types": "dist/esm/index.d.ts",
+  "type": "module",
   "exports": {
     ".": {
-      "import": "./dist/index.mjs",
-      "require": "./dist/index.js"
+      "import": "./dist/esm/index.js",
+      "require": "./dist/cjs/index.js"
     }
   },
   "scripts": {
-    "build": "tsup",
+    "build": "rimraf dist; tsc --module es2015 --target es5 --outDir dist/esm; tsc --module commonjs --target es5 --outDir dist/cjs",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "files": [

@@ -2,6 +2,8 @@
 #![allow(clippy::too_many_arguments)]
 use anchor_lang::prelude::*;
 
+declare_id!("SUNFT6ErsQvMcDzMcGyndq2P31wYCFs6G6WEcoyGkGc");
+
 pub mod state;
 use state::*;
 
@@ -10,9 +12,9 @@ pub mod seeds;
 pub mod utils;
 
 pub mod instructions;
-use instructions::*;
+mod external_programs;
 
-declare_id!("SUNFT6ErsQvMcDzMcGyndq2P31wYCFs6G6WEcoyGkGc");
+use instructions::*;
 
 #[program]
 pub mod impact_nft {
