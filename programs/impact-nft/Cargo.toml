@@ -20,6 +20,9 @@ idl-build = [
 ]
 
 [dependencies]
-anchor-lang = { version = "0.30.1", features = ["idl-build"] }
-anchor-spl = { version = "0.30.1", features = ["idl-build", "metadata"] }
+# needed to fix a bug in older versions of ahash. Note - solana-program includes two versions, a broken 0.7.* version
+# and a fixed 0.8.* version. This ensures that dependencies using the 0.7 channel do not pick up the broken one.
+ahash = "0.7.8"
+anchor-lang = { version = "0.30.1" }
+anchor-spl = { version = "0.30.1", features = ["metadata", "mpl-token-metadata"] }
 

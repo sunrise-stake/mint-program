@@ -1,15 +1,8 @@
 use anchor_lang::prelude::*;
 
-use crate::mpl_token_metadata::types::{Collection, Creator, DataV2};
-use crate::mpl_token_metadata::types::{CreateMetadataAccountArgsV3, CreateMasterEditionArgs, UpdateMetadataAccountArgsV2};
-use crate::mpl_token_metadata::cpi::{create_master_edition, create_metadata_account_v3, unverify_sized_collection_item, update_metadata_account_v2, verify_sized_collection_item};
-use crate::mpl_token_metadata::cpi::accounts::{
-    CreateMetadataAccountV3,
-    UnverifySizedCollectionItem,
-    VerifySizedCollectionItem,
-    CreateMasterEdition,
-    UpdateMetadataAccountV2,
-};
+use anchor_spl::metadata::mpl_token_metadata::types::{Collection, Creator, DataV2};
+use anchor_spl::metadata::{CreateMetadataAccountsV3, UnverifySizedCollectionItem, VerifySizedCollectionItem, CreateMasterEditionV3, create_metadata_accounts_v3, update_metadata_accounts_v2, unverify_sized_collection_item, verify_sized_collection_item, create_master_edition_v3, UpdateMetadataAccountsV2};
+use anchor_spl::metadata::mpl_token_metadata::accounts::Metadata;
 use crate::seeds::TOKEN_AUTHORITY_SEED;
 use crate::Level;
 
@@ -35,15 +28,15 @@ pub fn create_metadata_account<'a>(
         key: level.collection_mint,
     };
 
-    let token_auth_seeds = &[
+    let seeds = [
         TOKEN_AUTHORITY_SEED,
         global_state.as_ref(),
         &[token_authority_bump],
     ];
 
-    let cpi_ctx = CpiContext::new_with_signer(
+    let cpi_ctx = CpiContext::new(
         token_metadata_program,
-        CreateMetadataAccountV3 {
+        CreateMetadataAccountsV3 {
             metadata: metadata_account,
             mint,
             mint_authority: token_authority.clone(),
@@ -51,24 +44,22 @@ pub fn create_metadata_account<'a>(
             update_authority: token_authority.clone(),
             system_program,
             rent,
-        },
-        &[token_auth_seeds],
+        }
     );
-    create_metadata_account_v3(
-        cpi_ctx,
-        CreateMetadataAccountArgsV3 {
-            data: DataV2 {
-                name: level.name.clone(),
-                symbol: level.symbol.clone(),
-                uri: level.uri.clone(),
-                seller_fee_basis_points: 0,
-                creators: Some(creator),
-                collection: Some(collection),
-                uses: None,
-            },
-            is_mutable: false,
-            collection_details: None,
+    create_metadata_accounts_v3(
+        cpi_ctx.with_signer(&[&seeds]),
+        DataV2 {
+            name: level.name.clone(),
+            symbol: level.symbol.clone(),
+            uri: level.uri.clone(),
+            seller_fee_basis_points: 0,
+            creators: Some(creator),
+            collection: Some(collection),
+            uses: None,
         },
+        false,
+        false,
+        None,
     )?;
 
     Ok(())
@@ -80,19 +71,18 @@ pub fn unverify_nft<'a>(
     collection_mint: AccountInfo<'a>,
     collection_metadata: AccountInfo<'a>,
     collection_master_edition: AccountInfo<'a>,
-    collection_authority_record: AccountInfo<'a>,
     global_state: &Pubkey,
     token_authority: AccountInfo<'a>,
     token_authority_bump: u8,
     token_metadata_program: AccountInfo<'a>,
 ) -> Result<()> {
-    let token_auth_seeds = &[
+    let seeds = [
         TOKEN_AUTHORITY_SEED,
         global_state.as_ref(),
         &[token_authority_bump],
     ];
 
-    let cpi_ctx = CpiContext::new_with_signer(
+    let cpi_ctx = CpiContext::new(
         token_metadata_program,
         UnverifySizedCollectionItem {
             metadata: unverified_metadata,
@@ -101,12 +91,11 @@ pub fn unverify_nft<'a>(
             collection_mint,
             collection: collection_metadata,
             collection_master_edition_account: collection_master_edition,
-            collection_authority_record,
-        },
-        &[token_auth_seeds],
+        }
     );
     unverify_sized_collection_item(
-        cpi_ctx,
+        cpi_ctx.with_signer(&[&seeds]),
+        None
     )?;
 
     Ok(())
@@ -118,33 +107,31 @@ pub fn verify_nft<'a>(
     collection_mint: AccountInfo<'a>,
     collection_metadata: AccountInfo<'a>,
     collection_master_edition: AccountInfo<'a>,
-    collection_authority_record: AccountInfo<'a>,
     global_state: &Pubkey,
     token_authority: AccountInfo<'a>,
     token_authority_bump: u8,
     token_metadata_program: AccountInfo<'a>,
 ) -> Result<()> {
-    let token_auth_seeds = &[
+    let seeds = [
         TOKEN_AUTHORITY_SEED,
         global_state.as_ref(),
         &[token_authority_bump],
     ];
 
-    let cpi_ctx = CpiContext::new_with_signer(
+    let cpi_ctx = CpiContext::new(
         token_metadata_program,
         VerifySizedCollectionItem {
             metadata: unverified_metadata,
             collection_authority: token_authority,
             payer,
             collection_mint,
-            collection: collection_metadata,
-            collection_master_edition_account: collection_master_edition,
-            collection_authority_record,
+            collection_metadata,
+            collection_master_edition,
         },
-        &[token_auth_seeds],
     );
     verify_sized_collection_item(
-        cpi_ctx,
+        cpi_ctx.with_signer(&[&seeds]),
+        None
     )?;
 
     Ok(())
@@ -163,15 +150,15 @@ pub fn create_master_edition_account<'a>(
     token_program: AccountInfo<'a>,
     rent: AccountInfo<'a>,
 ) -> Result<()> {
-    let token_auth_seeds = &[
+    let seeds = [
         TOKEN_AUTHORITY_SEED,
         global_state.as_ref(),
         &[token_authority_bump],
     ];
 
-    let cpi_ctx = CpiContext::new_with_signer(
+    let cpi_ctx = CpiContext::new(
         token_metadata_program,
-        CreateMasterEdition {
+        CreateMasterEditionV3 {
             edition: master_edition,
             mint,
             update_authority: token_authority.clone(),
@@ -181,14 +168,11 @@ pub fn create_master_edition_account<'a>(
             token_program,
             system_program,
             rent,
-        },
-        &[token_auth_seeds],
+        }
     );
-    create_master_edition(
-        cpi_ctx,
-        CreateMasterEditionArgs {
-            max_supply: Some(0),
-        },
+    create_master_edition_v3(
+        cpi_ctx.with_signer(&[&seeds]),
+        Some(0)
     )?;
 
     Ok(())
@@ -223,29 +207,36 @@ pub fn update_metadata<'a>(
         uses: None,
     };
 
-    let token_auth_seeds = &[
+    let seeds = [
         TOKEN_AUTHORITY_SEED,
         global_state.as_ref(),
         &[token_authority_bump],
     ];
 
-    let cpi_ctx = CpiContext::new_with_signer(
+    let cpi_ctx = CpiContext::new(
         token_metadata_program,
-        UpdateMetadataAccountV2 {
-            metadata,
-            update_authority: token_authority.clone(),
+        UpdateMetadataAccountsV2 {
+            metadata: metadata.to_account_info(),
+            update_authority: token_authority.to_account_info(),
         },
-        &[token_auth_seeds],
     );
-    update_metadata_account_v2(
-        cpi_ctx,
-        UpdateMetadataAccountArgsV2 {
-            data: Some(new_data),
-            update_authority: Some(token_authority.key()),
-            primary_sale_happened: None,
-            is_mutable: None,
-        },
+    update_metadata_accounts_v2(
+        cpi_ctx.with_signer(&[&seeds]),
+        Some(token_authority.key()),
+        Some(new_data),
+        None,
+        None
     )?;
 
     Ok(())
+}
+
+/// Helper function that affirms that the metadata originates
+/// from this program instance. It does this by comparison with
+/// the mint which itself is validated by its unique offset_metadata
+pub fn check_metadata_account<'a>(metadata: &AccountInfo<'a>, mint: &AccountInfo<'a>) -> bool {
+    let state: Metadata =
+        Metadata::try_from(&metadata.to_account_info()).unwrap();
+
+    mint.key() == state.mint
 }

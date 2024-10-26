@@ -7,7 +7,7 @@ use crate::utils::token::{create_mint, create_token_account, mint_to};
 use anchor_lang::prelude::*;
 use anchor_spl::associated_token::AssociatedToken;
 use anchor_spl::token::Token;
-use crate::mpl_token_metadata;
+use crate::external_programs::mpl_token_metadata::MplTokenMetadata;
 
 /// Permissionless. The required external verification
 /// is the admin_mint_authority
@@ -73,7 +73,7 @@ pub struct MintNft<'info> {
 
     pub token_program: Program<'info, Token>,
     pub associated_token_program: Program<'info, AssociatedToken>,
-    pub token_metadata_program: Program<'info, mpl_token_metadata::program::MplTokenMetadata>,
+    pub token_metadata_program: Program<'info, MplTokenMetadata>,
     pub system_program: Program<'info, System>,
     pub rent: Sysvar<'info, Rent>,
     // disable fee payment until the client integration supports it
@@ -229,7 +229,6 @@ pub fn mint_nft_handler(ctx: Context<MintNft>, offset_amount: u64, _principal: u
         ctx.accounts.collection_mint.to_account_info(),
         ctx.accounts.collection_metadata.to_account_info(),
         ctx.accounts.collection_master_edition.to_account_info(),
-        ctx.accounts.collection_authority_record.to_account_info(),
         &global_state.key(),
         token_authority.to_account_info(),
         token_authority_bump,
